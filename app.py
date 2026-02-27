@@ -1,6 +1,7 @@
 import streamlit as st
 from src.models import FinanceParams
 from src.calculator import calculate_yearly_projection
+from src.ui.charts import create_asset_chart
 
 st.set_page_config(
     page_title="家庭收支预测系统",
@@ -72,6 +73,11 @@ if st.button("计算预测", type="primary"):
         col2.metric("退休年份", f"{retirement_data.year}年")
         col3.metric("退休时存款", f"¥{retirement_data.savings/10000:.2f}万")
         col4.metric("退休时总资产", f"¥{retirement_data.total_assets/10000:.2f}万")
+
+    # 显示图表
+    st.subheader("资产趋势图")
+    fig = create_asset_chart(yearly_data)
+    st.plotly_chart(fig, use_container_width=True)
 
     # 显示数据表格
     st.subheader("年度收支预测")
