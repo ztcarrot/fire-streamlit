@@ -85,6 +85,11 @@ with st.expander("💡 使用说明", expanded=False):
 with st.sidebar:
     st.header("📊 参数设置")
 
+    # 滚动提示
+    st.info("💡 **使用技巧**: 将参数分组折叠,便于滚动")
+    st.caption("- 使用 ⬆️⬇️ 按钮或鼠标拖动滚动条")
+    st.caption("- 鼠标悬停输入框外可使用滚轮")
+
     # 预设管理
     presets = load_presets()
     preset_names = list(presets.keys())
@@ -121,28 +126,37 @@ with st.sidebar:
 
     st.divider()
 
+    # 💡 滚动提示
+    st.caption("💡 提示: 鼠标在输入框时请使用页面滚动条或键盘↑↓键")
+
     # 基础参数
-    st.subheader("📅 基础参数")
-    # 从 session_state 获取值,如果没有则使用默认值
-    def get_param(key, default, param_type=None):
-        val = st.session_state.get(f'param_{key}', None)
-        if val is None:
-            return default
-        # 确保类型正确
-        if param_type == 'int':
-            return int(val)
-        elif param_type == 'float':
-            return float(val)
-        return val
+    with st.expander("📅 基础参数", expanded=True):
+        # 从 session_state 获取值,如果没有则使用默认值
+        def get_param(key, default, param_type=None):
+            val = st.session_state.get(f'param_{key}', None)
+            if val is None:
+                return default
+            # 确保类型正确
+            if param_type == 'int':
+                return int(val)
+            elif param_type == 'float':
+                return float(val)
+            return val
 
-    start_year = st.number_input("起始年份", value=get_param('start_year', CURRENT_YEAR, 'int'), min_value=2000, max_value=2100, key='param_start_year')
-    start_work_year = st.number_input("开始工作年份", value=get_param('start_work_year', CURRENT_YEAR-10, 'int'), min_value=1980, max_value=2030, key='param_start_work_year')
-    current_age = st.number_input("当前年龄", value=get_param('current_age', 34, 'int'), min_value=18, max_value=80, key='param_current_age')
-    retirement_age = st.number_input("退休年龄", value=get_param('retirement_age', 45, 'int'), min_value=18, max_value=80, key='param_retirement_age')
+        col1, col2 = st.columns(2)
+        with col1:
+            start_year = st.number_input("起始年份", value=get_param('start_year', CURRENT_YEAR, 'int'), min_value=2000, max_value=2100, key='param_start_year')
+            current_age = st.number_input("当前年龄", value=get_param('current_age', 34, 'int'), min_value=18, max_value=80, key='param_current_age')
+        with col2:
+            start_work_year = st.number_input("开始工作年份", value=get_param('start_work_year', CURRENT_YEAR-10, 'int'), min_value=1980, max_value=2030, key='param_start_work_year')
+            retirement_age = st.number_input("退休年龄", value=get_param('retirement_age', 45, 'int'), min_value=18, max_value=80, key='param_retirement_age')
 
-    st.subheader("💰 薪资参数")
-    initial_monthly_salary = st.number_input("当前月薪(元)", value=get_param('initial_monthly_salary', 10000, 'int'), min_value=0, step=1000, key='param_initial_monthly_salary')
-    local_average_salary = st.number_input("当地月平均工资(元)", value=get_param('local_average_salary', 12307, 'int'), min_value=0, step=100, key='param_local_average_salary')
+    # 薪资参数
+    with st.expander("💰 薪资参数", expanded=True):
+        initial_monthly_salary = st.number_input("当前月薪(元)", value=get_param('initial_monthly_salary', 10000, 'int'), min_value=0, step=1000, key='param_initial_monthly_salary',
+                                             help="当前月税前收入")
+        local_average_salary = st.number_input("当地月平均工资(元)", value=get_param('local_average_salary', 12307, 'int'), min_value=0, step=100, key='param_local_average_salary',
+                                           help="社保缴费基数参考")
 
     with st.expander("🔧 高级参数", expanded=False):
         salary_growth_rate = st.number_input("工资年增长率(%)", value=get_param('salary_growth_rate', 4.0, 'float'), min_value=0.0, max_value=20.0, step=0.5, key='param_salary_growth_rate',
@@ -161,15 +175,20 @@ with st.sidebar:
         st.caption("💡 物价增长率已经由工资增长率近似")
         inflation_rate = 0.0  # 固定为0
 
-    st.subheader("💎 初始资产")
-    initial_savings = st.number_input("初始存款(元)", value=get_param('initial_savings', 1000000, 'int'), min_value=0, step=10000, key='param_initial_savings', format="%d",
-                                 help="当前银行存款总额")
-    initial_housing_fund = st.number_input("初始公积金(元)", value=get_param('initial_housing_fund', 150000, 'int'), min_value=0, step=10000, key='param_initial_housing_fund', format="%d",
-                                      help="当前公积金账户余额")
-    housing_fund_rate = st.number_input("公积金年增长率(%)", value=get_param('housing_fund_rate', 1.5, 'float'), min_value=0.0, max_value=15.0, step=0.5, key='param_housing_fund_rate',
-                                 help="预期公积金年增长率")
-    initial_personal_pension = st.number_input("个人养老金账户初始值(元)", value=get_param('initial_personal_pension', 0, 'int'), min_value=0, step=1000, key='param_initial_personal_pension', format="%d",
-                                           help="个人养老金账户初始金额")
+    # 初始资产
+    with st.expander("💎 初始资产", expanded=True):
+        col1, col2 = st.columns(2)
+        with col1:
+            initial_savings = st.number_input("初始存款(元)", value=get_param('initial_savings', 1000000, 'int'), min_value=0, step=10000, key='param_initial_savings', format="%d",
+                                         help="当前银行存款总额")
+            initial_housing_fund = st.number_input("初始公积金(元)", value=get_param('initial_housing_fund', 150000, 'int'), min_value=0, step=10000, key='param_initial_housing_fund', format="%d",
+                                              help="当前公积金账户余额")
+        with col2:
+            housing_fund_rate = st.number_input("公积金年增长率(%)", value=get_param('housing_fund_rate', 1.5, 'float'), min_value=0.0, max_value=15.0, step=0.5, key='param_housing_fund_rate',
+                                     help="预期公积金年增长率")
+            initial_personal_pension = st.number_input("个人养老金账户初始值(元)", value=get_param('initial_personal_pension', 0, 'int'), min_value=0, step=1000, key='param_initial_personal_pension', format="%d",
+                                                   help="个人养老金账户初始金额")
+
 
     st.divider()
     st.subheader("💾 保存预设")
