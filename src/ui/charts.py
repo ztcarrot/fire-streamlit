@@ -53,7 +53,7 @@ def create_asset_chart(yearly_data: List[YearlyData], scenario_name: str = "") -
         xaxis_title="年份",
         yaxis_title="金额(万元)",
         hovermode='x unified',
-        legend=dict(x=0, y=1),
+        legend=dict(x=0, y=0),
         height=400
     )
 
@@ -85,7 +85,7 @@ def create_multi_scenario_chart(scenarios: dict[str, List[YearlyData]]) -> go.Fi
         xaxis_title="年份",
         yaxis_title="总资产(万元)",
         hovermode='x unified',
-        legend=dict(x=0, y=1),
+        legend=dict(x=0, y=0),
         height=400
     )
 
