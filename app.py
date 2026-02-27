@@ -171,16 +171,24 @@ with st.sidebar:
                                            help="社保缴费基数参考")
 
     with st.expander("🔧 高级参数", expanded=False):
-        salary_growth_rate = text_input_number("工资年增长率(%)", 'salary_growth_rate', get_param('salary_growth_rate', 4.0, 'float'), 'float',
+        col1, col2 = st.columns(2)
+        with col1:
+            salary_growth_rate = text_input_number("工资年增长率(%)", 'salary_growth_rate', get_param('salary_growth_rate', 4.0, 'float'), 'float',
                                           help="影响未来收入增长和养老金基数")
-        pension_replacement_ratio = text_input_number("养老金替代率", 'pension_replacement_ratio', get_param('pension_replacement_ratio', 0.4, 'float'), 'float',
+        with col2:
+            deposit_rate = text_input_number("存款年利率(%)", 'deposit_rate', get_param('deposit_rate', 2.0, 'float'), 'float',
+                                help="银行存款/理财年化收益率")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            pension_replacement_ratio = text_input_number("养老金替代率", 'pension_replacement_ratio', get_param('pension_replacement_ratio', 0.4, 'float'), 'float',
                                                 help="退休后养老金占平均工资的比例（如：0.4 表示 40%）")
+        with col2:
+            living_expense_ratio = text_input_number("消费水平比例", 'living_expense_ratio', get_param('living_expense_ratio', 0.5, 'float'), 'float',
+                                     help="月生活开销占当地平均工资的比例")
+
         contribution_ratio = text_input_number("灵活就业缴纳比例", 'contribution_ratio', get_param('contribution_ratio', 0.6, 'float'), 'float',
                                        help="社保缴费基数比例(0.6-3.0)")
-        living_expense_ratio = text_input_number("生活开销/当地平均工资", 'living_expense_ratio', get_param('living_expense_ratio', 0.5, 'float'), 'float',
-                                     help="月生活开销占当地平均工资的比例")
-        deposit_rate = text_input_number("存款年利率(%)", 'deposit_rate', get_param('deposit_rate', 2.0, 'float'), 'float',
-                                help="银行存款/理财年化收益率")
 
         # 物价增长率固定为0，不可编辑
         st.info("📊 **物价增长率**: 已固定为 0%")
