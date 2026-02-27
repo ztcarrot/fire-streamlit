@@ -318,8 +318,8 @@ st.subheader("📋 年度收支预测表")
 import pandas as pd
 
 df_data = [{
-    "年份": d.year,
     "年龄": d.age,
+    "年份": d.year,
     "月平均工资": f"¥{d.average_salary/10000:.2f}万",
     "月薪": f"¥{d.monthly_salary/10000:.2f}万",
     "年养老金缴纳": f"¥{d.pension_contribution/10000:.2f}万",
@@ -334,6 +334,8 @@ df_data = [{
 } for d in yearly_data]
 
 df = pd.DataFrame(df_data)
+# 将年龄设为索引，这样会成为第一列并可以固定
+df = df.set_index('年龄')
 
 # 定义样式函数：总资产为负数时显示红色
 def color_negative_red(val):
@@ -346,6 +348,8 @@ def color_negative_red(val):
 styled_df = df.style.applymap(color_negative_red, subset=['总资产'])
 # 格式化总资产列
 styled_df = styled_df.format({'总资产': '¥{:.2f}万'})
+# 固定索引列（年龄）在左侧
+styled_df = styled_df.set_sticky(axis="index")
 
 st.dataframe(styled_df, use_container_width=True, height=400)
 
