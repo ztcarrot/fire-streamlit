@@ -85,11 +85,6 @@ with st.expander("💡 使用说明", expanded=False):
 with st.sidebar:
     st.header("📊 参数设置")
 
-    # 滚动提示
-    st.info("💡 **使用技巧**: 将参数分组折叠,便于滚动")
-    st.caption("- 使用 ⬆️⬇️ 按钮或鼠标拖动滚动条")
-    st.caption("- 鼠标悬停输入框外可使用滚轮")
-
     # 预设管理
     presets = load_presets()
     preset_names = list(presets.keys())
@@ -126,9 +121,6 @@ with st.sidebar:
                     st.rerun()
 
     st.divider()
-
-    # 💡 滚动提示
-    st.caption("💡 提示: 鼠标在输入框时请使用页面滚动条或键盘↑↓键")
 
     # 基础参数
     with st.expander("📅 基础参数", expanded=True):
