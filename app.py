@@ -197,10 +197,18 @@ with st.sidebar:
     st.divider()
     st.subheader("📊 场景对比")
 
+    # 动态获取所有可用的预设（包括用户自定义的）
+    all_presets = load_presets()
+    all_preset_names = list(all_presets.keys())
+
+    # 如果有自定义预设，添加提示
+    if len(all_preset_names) > 3:
+        st.caption(f"💡 共有 {len(all_preset_names)} 个预设可选，包括您保存的自定义预设")
+
     # 选择要对比的场景
     compare_scenarios = st.multiselect(
         "选择对比场景",
-        options=["保守策略", "中性策略", "乐观策略"],
+        options=all_preset_names,
         default=[]
     )
 
