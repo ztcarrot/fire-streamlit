@@ -1,8 +1,8 @@
 import streamlit as st
 from src.models import FinanceParams
-from src.calculator import calculate_yearly_projection
-from src.ui.charts import create_asset_chart
-from src.utils.presets import load_presets, save_preset, delete_preset, params_from_dict
+from src.calculator import calculate_yearly_projection, calculate_scenarios
+from src.ui.charts import create_asset_chart, create_multi_scenario_chart
+from src.utils.presets import load_presets, save_preset, delete_preset, params_from_dict, get_preset
 
 st.set_page_config(
     page_title="家庭收支预测系统",
@@ -75,6 +75,16 @@ with st.sidebar:
             else:
                 st.error("请输入预设名称")
 
+    st.divider()
+    st.subheader("场景对比")
+
+    # 选择要对比的场景
+    compare_scenarios = st.multiselect(
+        "选择对比场景",
+        options=["保守策略", "中性策略", "乐观策略"],
+        default=[]
+    )
+
 # 创建参数对象
 params = FinanceParams(
     start_year=start_year,
@@ -133,3 +143,38 @@ if st.button("计算预测", type="primary"):
     } for d in yearly_data]
 
     st.dataframe(df_data, use_container_width=True)
+
+# 多场景对比
+if compare_scenarios:
+    st.divider()
+    st.subheader("多场景对比分析")
+
+    # 加载选定场景的参数
+    scenario_params = {}
+    for scenario_name in compare_scenarios:
+        preset_data = get_preset(scenario_name)
+        if preset_data:
+            scenario_params[scenario_name] = params_from_dict(preset_data['params'])
+
+    # 计算所有场景
+    with st.spinner("计算场景中..."):
+        scenario_results = calculate_scenarios(scenario_params)
+
+    # 显示对比图表
+    fig = create_multi_scenario_chart(scenario_results)
+    st.plotly_chart(fig, use_container_width=True)
+
+    # 显示对比表格
+    st.subheader("关键指标对比")
+    comparison_data = []
+    for name, results in scenario_results.items():
+        retirement_data = next((d for d in results if d.is_retirement_year), None)
+        if retirement_data:
+            comparison_data.append({
+                "场景": name,
+                "退休年份": retirement_data.year,
+                "退休时存款": f"¥{retirement_data.savings/10000:.2f}万",
+                "退休时总资产": f"¥{retirement_data.total_assets/10000:.2f}万"
+            })
+
+    st.dataframe(comparison_data, use_container_width=True)
