@@ -81,8 +81,18 @@ def load_presets() -> Dict[str, Any]:
         save_presets(DEFAULT_PRESETS)
         return DEFAULT_PRESETS.copy()
 
-    with open(PRESETS_FILE, 'r', encoding='utf-8') as f:
-        return json.load(f)
+    try:
+        with open(PRESETS_FILE, 'r', encoding='utf-8') as f:
+            content = f.read().strip()
+            if not content:
+                # 文件为空,返回默认预设
+                save_presets(DEFAULT_PRESETS)
+                return DEFAULT_PRESETS.copy()
+            return json.loads(content)
+    except (json.JSONDecodeError, Exception):
+        # 文件损坏或读取失败,返回默认预设
+        save_presets(DEFAULT_PRESETS)
+        return DEFAULT_PRESETS.copy()
 
 
 def save_presets(presets: Dict[str, Any]):
