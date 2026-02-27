@@ -2,21 +2,20 @@ from typing import List
 from .models import FinanceParams, YearlyData
 
 def calculate_yearly_projection(
-    params: FinanceParams,
-    max_projection_years: int = 60
+    params: FinanceParams
 ) -> List[YearlyData]:
     """
-    计算年度财务预测
+    计算年度财务预测（计算到100岁）
 
     核心逻辑:
     1. 工资增长: 退休前按增长率增长,退休后为0
     2. 当地平均工资: 每年按增长率增长
     3. 养老金缴纳: 退休前或未满最低年限时继续缴纳
-    4. 个人养老金账户: 基数 × 8% × 12
+    4. 公积金账户: 每年增长1.5% + 月工资7%，60岁提取
     5. 生活开销: 考虑通胀
     6. 60岁后满足年限可领取养老金
     7. 存款累计: 含利息
-    8. 总资产 = 存款 + 公积金 + 个人养老金
+    8. 总资产 = 存款 + 公积金
     """
     data: List[YearlyData] = []
 
@@ -35,7 +34,11 @@ def calculate_yearly_projection(
     MIN_MEDICAL_YEARS = 25  # 医保最低缴纳年限
     PENSION_RECEIVE_AGE = 60  # 领取养老金年龄
 
-    for i in range(max_projection_years + 1):
+    # 计算到100岁
+    max_age = 100
+    projection_years = max_age - params.current_age
+
+    for i in range(projection_years + 1):
         year = params.start_year + i
         age = params.current_age + i
         is_retired = age >= params.retirement_age
