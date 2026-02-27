@@ -173,9 +173,8 @@ with st.sidebar:
     with st.expander("🔧 高级参数", expanded=False):
         salary_growth_rate = text_input_number("工资年增长率(%)", 'salary_growth_rate', get_param('salary_growth_rate', 4.0, 'float'), 'float',
                                           help="影响未来收入增长和养老金基数")
-        pension_replacement_ratio_input = text_input_number("养老金替代率(%)", 'pension_replacement_ratio', get_param('pension_replacement_ratio', 40.0, 'float'), 'float',
-                                                help="退休后养老金占平均工资的比例")
-        pension_replacement_ratio = pension_replacement_ratio_input / 100.0
+        pension_replacement_ratio = text_input_number("养老金替代率", 'pension_replacement_ratio', get_param('pension_replacement_ratio', 0.4, 'float'), 'float',
+                                                help="退休后养老金占平均工资的比例（如：0.4 表示 40%）")
         contribution_ratio = text_input_number("灵活就业缴纳比例", 'contribution_ratio', get_param('contribution_ratio', 0.6, 'float'), 'float',
                                        help="社保缴费基数比例(0.6-3.0)")
         living_expense_ratio = text_input_number("生活开销/当地平均工资", 'living_expense_ratio', get_param('living_expense_ratio', 0.5, 'float'), 'float',
