@@ -2,6 +2,7 @@ import streamlit as st
 from src.models import FinanceParams
 from src.calculator import calculate_yearly_projection
 from src.ui.charts import create_asset_chart
+from src.utils.presets import load_presets, save_preset, delete_preset, params_from_dict
 
 st.set_page_config(
     page_title="家庭收支预测系统",
@@ -14,6 +15,28 @@ st.title("家庭收支预测系统 - Streamlit版")
 # 侧边栏参数输入
 with st.sidebar:
     st.header("参数设置")
+
+    # 预设管理
+    presets = load_presets()
+    preset_names = list(presets.keys())
+    selected_preset = st.selectbox("选择预设", ["默认"] + preset_names)
+
+    if selected_preset != "默认":
+        preset_data = presets[selected_preset]
+        st.info(f"说明: {preset_data.get('description', '无')}")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("加载此预设", key="load_preset"):
+                loaded_params = params_from_dict(preset_data['params'])
+                st.session_state['loaded_params'] = loaded_params
+                st.success("预设已加载,请点击计算")
+        with col2:
+            if selected_preset not in ["保守策略", "中性策略", "乐观策略"] and st.button("删除预设", key="delete_preset"):
+                delete_preset(selected_preset)
+                st.rerun()
+
+    st.divider()
 
     # 基础参数
     st.subheader("基础参数")
@@ -39,6 +62,18 @@ with st.sidebar:
     initial_housing_fund = st.number_input("初始公积金(元)", value=370000, min_value=0, step=10000)
     housing_fund_rate = st.number_input("公积金年增长率(%)", value=1.5, min_value=0.0, max_value=15.0, step=0.5)
     initial_personal_pension = st.number_input("个人养老金账户初始值(元)", value=0, min_value=0, step=1000)
+
+    st.divider()
+    st.subheader("保存预设")
+    with st.expander("保存当前参数为预设"):
+        new_preset_name = st.text_input("预设名称")
+        new_preset_desc = st.text_input("预设说明")
+        if st.button("保存预设"):
+            if new_preset_name:
+                save_preset(new_preset_name, params, new_preset_desc)
+                st.success(f"预设 '{new_preset_name}' 已保存!")
+            else:
+                st.error("请输入预设名称")
 
 # 创建参数对象
 params = FinanceParams(
