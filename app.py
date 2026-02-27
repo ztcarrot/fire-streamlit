@@ -124,28 +124,36 @@ with st.sidebar:
     # 基础参数
     st.subheader("📅 基础参数")
     # 从 session_state 获取值,如果没有则使用默认值
-    def get_param(key, default):
-        return st.session_state.get(f'param_{key}', default)
+    def get_param(key, default, param_type=None):
+        val = st.session_state.get(f'param_{key}', None)
+        if val is None:
+            return default
+        # 确保类型正确
+        if param_type == 'int':
+            return int(val)
+        elif param_type == 'float':
+            return float(val)
+        return val
 
-    start_year = st.number_input("起始年份", value=get_param('start_year', CURRENT_YEAR), min_value=2000, max_value=2100, key='param_start_year')
-    start_work_year = st.number_input("开始工作年份", value=get_param('start_work_year', CURRENT_YEAR-10), min_value=1980, max_value=2030, key='param_start_work_year')
-    current_age = st.number_input("当前年龄", value=get_param('current_age', 34), min_value=18, max_value=80, key='param_current_age')
-    retirement_age = st.number_input("退休年龄", value=get_param('retirement_age', 45), min_value=18, max_value=80, key='param_retirement_age')
+    start_year = st.number_input("起始年份", value=get_param('start_year', CURRENT_YEAR, 'int'), min_value=2000, max_value=2100, key='param_start_year')
+    start_work_year = st.number_input("开始工作年份", value=get_param('start_work_year', CURRENT_YEAR-10, 'int'), min_value=1980, max_value=2030, key='param_start_work_year')
+    current_age = st.number_input("当前年龄", value=get_param('current_age', 34, 'int'), min_value=18, max_value=80, key='param_current_age')
+    retirement_age = st.number_input("退休年龄", value=get_param('retirement_age', 45, 'int'), min_value=18, max_value=80, key='param_retirement_age')
 
     st.subheader("💰 薪资参数")
-    initial_monthly_salary = st.number_input("当前月薪(元)", value=get_param('initial_monthly_salary', 10000), min_value=0, step=1000, key='param_initial_monthly_salary')
-    local_average_salary = st.number_input("当地月平均工资(元)", value=get_param('local_average_salary', 12307), min_value=0, step=100, key='param_local_average_salary')
+    initial_monthly_salary = st.number_input("当前月薪(元)", value=get_param('initial_monthly_salary', 10000, 'int'), min_value=0, step=1000, key='param_initial_monthly_salary')
+    local_average_salary = st.number_input("当地月平均工资(元)", value=get_param('local_average_salary', 12307, 'int'), min_value=0, step=100, key='param_local_average_salary')
 
     with st.expander("🔧 高级参数", expanded=False):
-        salary_growth_rate = st.number_input("工资年增长率(%)", value=get_param('salary_growth_rate', 4.0), min_value=0.0, max_value=20.0, step=0.5, key='param_salary_growth_rate',
+        salary_growth_rate = st.number_input("工资年增长率(%)", value=get_param('salary_growth_rate', 4.0, 'float'), min_value=0.0, max_value=20.0, step=0.5, key='param_salary_growth_rate',
                                           help="影响未来收入增长和养老金基数")
-        pension_replacement_ratio = st.number_input("养老金替代率(%)", value=get_param('pension_replacement_ratio', 40.0), min_value=0.0, max_value=100.0, step=1.0, key='param_pension_replacement_ratio',
-                                                help="退休后养老金占平均工资的比例") / 100
-        contribution_ratio = st.number_input("灵活就业缴纳比例", value=get_param('contribution_ratio', 0.6), min_value=0.6, max_value=3.0, step=0.1, key='param_contribution_ratio',
+        pension_replacement_ratio = st.number_input("养老金替代率(%)", value=get_param('pension_replacement_ratio', 40.0, 'float')/100.0, min_value=0.0, max_value=100.0, step=1.0, key='param_pension_replacement_ratio',
+                                                help="退休后养老金占平均工资的比例")
+        contribution_ratio = st.number_input("灵活就业缴纳比例", value=get_param('contribution_ratio', 0.6, 'float'), min_value=0.6, max_value=3.0, step=0.1, key='param_contribution_ratio',
                                        help="社保缴费基数比例(0.6-3.0)")
-        living_expense_ratio = st.number_input("生活开销/当地平均工资", value=get_param('living_expense_ratio', 0.5), min_value=0.0, max_value=2.0, step=0.1, key='param_living_expense_ratio',
+        living_expense_ratio = st.number_input("生活开销/当地平均工资", value=get_param('living_expense_ratio', 0.5, 'float'), min_value=0.0, max_value=2.0, step=0.1, key='param_living_expense_ratio',
                                      help="月生活开销占当地平均工资的比例")
-        deposit_rate = st.number_input("存款年利率(%)", value=get_param('deposit_rate', 2.0), min_value=0.0, max_value=10.0, step=0.5, key='param_deposit_rate',
+        deposit_rate = st.number_input("存款年利率(%)", value=get_param('deposit_rate', 2.0, 'float'), min_value=0.0, max_value=10.0, step=0.5, key='param_deposit_rate',
                                 help="银行存款/理财年化收益率")
 
         # 物价增长率固定为0，不可编辑
@@ -154,13 +162,13 @@ with st.sidebar:
         inflation_rate = 0.0  # 固定为0
 
     st.subheader("💎 初始资产")
-    initial_savings = st.number_input("初始存款(元)", value=get_param('initial_savings', 1000000), min_value=0, step=10000, key='param_initial_savings', format="%d",
+    initial_savings = st.number_input("初始存款(元)", value=get_param('initial_savings', 1000000, 'int'), min_value=0, step=10000, key='param_initial_savings', format="%d",
                                  help="当前银行存款总额")
-    initial_housing_fund = st.number_input("初始公积金(元)", value=get_param('initial_housing_fund', 150000), min_value=0, step=10000, key='param_initial_housing_fund', format="%d",
+    initial_housing_fund = st.number_input("初始公积金(元)", value=get_param('initial_housing_fund', 150000, 'int'), min_value=0, step=10000, key='param_initial_housing_fund', format="%d",
                                       help="当前公积金账户余额")
-    housing_fund_rate = st.number_input("公积金年增长率(%)", value=get_param('housing_fund_rate', 1.5), min_value=0.0, max_value=15.0, step=0.5, key='param_housing_fund_rate',
+    housing_fund_rate = st.number_input("公积金年增长率(%)", value=get_param('housing_fund_rate', 1.5, 'float'), min_value=0.0, max_value=15.0, step=0.5, key='param_housing_fund_rate',
                                  help="预期公积金年增长率")
-    initial_personal_pension = st.number_input("个人养老金账户初始值(元)", value=get_param('initial_personal_pension', 0), min_value=0, step=1000, key='param_initial_personal_pension', format="%d",
+    initial_personal_pension = st.number_input("个人养老金账户初始值(元)", value=get_param('initial_personal_pension', 0, 'int'), min_value=0, step=1000, key='param_initial_personal_pension', format="%d",
                                            help="个人养老金账户初始金额")
 
     st.divider()
