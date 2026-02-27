@@ -17,16 +17,48 @@ st.set_page_config(
 
 st.title("家庭收支预测系统 - Streamlit版")
 
+# 初始化 session state
+if 'show_param_guide' not in st.session_state:
+    st.session_state.show_param_guide = False
+if 'show_help' not in st.session_state:
+    st.session_state.show_help = False
+
 # 顶部快捷链接
 col1, col2, col3 = st.columns([3, 1, 1])
 with col1:
     st.markdown("💡 **实时计算**: 修改左侧参数后,右侧数据和图表会自动刷新")
 with col2:
     if st.button("📖 参数说明"):
-        st.switch_page("PARAMETERS_GUIDE.md")
+        st.session_state.show_param_guide = not st.session_state.show_param_guide
+        st.rerun()
 with col3:
     if st.button("❓ 使用帮助"):
-        st.switch_page("README.md")
+        st.session_state.show_help = not st.session_state.show_help
+        st.rerun()
+
+# 参数说明弹窗
+if st.session_state.show_param_guide:
+    with st.expander("📖 参数说明", expanded=True):
+        try:
+            with open('PARAMETERS_GUIDE.md', 'r', encoding='utf-8') as f:
+                st.markdown(f.read())
+        except FileNotFoundError:
+            st.info("参数说明文件未找到")
+        if st.button("关闭参数说明", key="close_param_guide"):
+            st.session_state.show_param_guide = False
+            st.rerun()
+
+# 使用帮助弹窗
+if st.session_state.show_help:
+    with st.expander("❓ 使用帮助", expanded=True):
+        try:
+            with open('README.md', 'r', encoding='utf-8') as f:
+                st.markdown(f.read())
+        except FileNotFoundError:
+            st.info("README 文件未找到")
+        if st.button("关闭帮助", key="close_help"):
+            st.session_state.show_help = False
+            st.rerun()
 
 # 使用说明
 with st.expander("💡 使用说明", expanded=False):
@@ -138,7 +170,26 @@ with st.sidebar:
         new_preset_desc = st.text_input("预设说明", key="new_preset_desc")
         if st.button("💾 保存预设", key="save_preset_btn"):
             if new_preset_name:
-                save_preset(new_preset_name, params, new_preset_desc)
+                # 获取当前参数值
+                current_params = FinanceParams(
+                    start_year=int(start_year),
+                    start_work_year=int(start_work_year),
+                    current_age=int(current_age),
+                    retirement_age=int(retirement_age),
+                    initial_monthly_salary=float(initial_monthly_salary),
+                    local_average_salary=float(local_average_salary),
+                    salary_growth_rate=float(salary_growth_rate),
+                    pension_replacement_ratio=float(pension_replacement_ratio),
+                    contribution_ratio=float(contribution_ratio),
+                    living_expense_ratio=float(living_expense_ratio),
+                    deposit_rate=float(deposit_rate),
+                    inflation_rate=float(inflation_rate),
+                    initial_savings=float(initial_savings),
+                    initial_housing_fund=float(initial_housing_fund),
+                    housing_fund_rate=float(housing_fund_rate),
+                    initial_personal_pension=float(initial_personal_pension)
+                )
+                save_preset(new_preset_name, current_params, new_preset_desc)
                 st.success(f"✓ 预设 '{new_preset_name}' 已保存!")
             else:
                 st.error("请输入预设名称")
@@ -192,12 +243,8 @@ params = FinanceParams(
     initial_personal_pension=float(initial_personal_pension)
 )
 
-# 自动计算(实时)
-@st.cache_data(ttl=60)
-def cached_calculation(p):
-    return calculate_yearly_projection(p)
-
-yearly_data = cached_calculation(params)
+# 自动计算(实时) - 不使用缓存以避免哈希问题
+yearly_data = calculate_yearly_projection(params)
 
 # 显示关键指标
 retirement_data = next((d for d in yearly_data if d.age == retirement_age), None)
@@ -262,25 +309,28 @@ if compare_scenarios:
         if preset_data:
             scenario_params[scenario_name] = params_from_dict(preset_data['params'])
 
-    # 计算所有场景
-    with st.spinner("计算场景中..."):
-        scenario_results = calculate_scenarios(scenario_params)
+    if scenario_params:
+        # 计算所有场景
+        with st.spinner("计算场景中..."):
+            scenario_results = calculate_scenarios(scenario_params)
 
-    # 显示对比图表
-    fig = create_multi_scenario_chart(scenario_results)
-    st.plotly_chart(fig, use_container_width=True)
+        # 显示对比图表
+        fig = create_multi_scenario_chart(scenario_results)
+        st.plotly_chart(fig, use_container_width=True)
 
-    # 显示对比表格
-    st.subheader("📊 关键指标对比")
-    comparison_data = []
-    for name, results in scenario_results.items():
-        retirement_data = next((d for d in results if d.is_retirement_year), None)
-        if retirement_data:
-            comparison_data.append({
-                "场景": name,
-                "退休年份": retirement_data.year,
-                "退休时存款": f"¥{retirement_data.savings/10000:.2f}万",
-                "退休时总资产": f"¥{retirement_data.total_assets/10000:.2f}万"
-            })
+        # 显示对比表格
+        st.subheader("📊 关键指标对比")
+        comparison_data = []
+        for name, results in scenario_results.items():
+            retirement_data = next((d for d in results if d.is_retirement_year), None)
+            if retirement_data:
+                comparison_data.append({
+                    "场景": name,
+                    "退休年份": retirement_data.year,
+                    "退休时存款": f"¥{retirement_data.savings/10000:.2f}万",
+                    "退休时总资产": f"¥{retirement_data.total_assets/10000:.2f}万"
+                })
 
-    st.dataframe(comparison_data, use_container_width=True)
+        st.dataframe(comparison_data, use_container_width=True)
+    else:
+        st.warning("无法加载选定的场景，请检查预设配置")
