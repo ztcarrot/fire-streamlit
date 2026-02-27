@@ -72,11 +72,11 @@ def calculate_yearly_projection(
                 medical_years += 1
 
         # 公积金账户: 每年增长1.5% + 月工资的7%
-        if not is_retired and i > 0:
+        if age < 60 and i > 0:
             housing_fund = housing_fund * (1 + params.housing_fund_rate / 100) + monthly_salary * 0.07 * 12
 
-        # 退休那年提取公积金到存款
-        if is_retired and housing_fund > 0:
+        # 60岁退休那年提取公积金到存款
+        if age == 60 and housing_fund > 0:
             savings += housing_fund
             housing_fund = 0
 
