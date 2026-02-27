@@ -315,6 +315,8 @@ st.plotly_chart(fig, use_container_width=True)
 
 # 显示数据表格
 st.subheader("📋 年度收支预测表")
+import pandas as pd
+
 df_data = [{
     "年份": d.year,
     "年龄": d.age,
@@ -328,10 +330,24 @@ df_data = [{
     "年领取养老金": f"¥{d.annual_pension_received/10000:.2f}万" if d.annual_pension_received > 0 else "-",
     "年生活开销": f"¥{d.living_expense/10000:.2f}万",
     "存款": f"¥{d.savings/10000:.2f}万",
-    "总资产": f"¥{d.total_assets/10000:.2f}万"
+    "总资产": d.total_assets / 10000  # 保存数值用于样式
 } for d in yearly_data]
 
-st.dataframe(df_data, use_container_width=True, height=400)
+df = pd.DataFrame(df_data)
+
+# 定义样式函数：总资产为负数时显示红色
+def color_negative_red(val):
+    """总资产为负数时显示红色"""
+    if isinstance(val, (int, float)) and val < 0:
+        return 'color: red; font-weight: bold;'
+    return ''
+
+# 应用样式
+styled_df = df.style.applymap(color_negative_red, subset=['总资产'])
+# 格式化总资产列
+styled_df = styled_df.format({'总资产': '¥{:.2f}万'})
+
+st.dataframe(styled_df, use_container_width=True, height=400)
 
 # 导出按钮
 st.divider()
