@@ -41,7 +41,7 @@ class YearlyData:
     monthly_salary: float
     contribution_base: float
     pension_contribution: float
-    personal_pension_account: float
+    housing_fund_account: float
     pension_years: int
     medical_years: int
     can_receive_pension: bool

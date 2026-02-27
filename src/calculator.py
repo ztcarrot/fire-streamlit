@@ -24,7 +24,6 @@ def calculate_yearly_projection(
     average_salary = params.local_average_salary
     savings = params.initial_savings
     housing_fund = params.initial_housing_fund
-    personal_pension_account = params.initial_personal_pension
 
     # 从工作年份到起始年份已缴纳的年数
     initial_pension_years = max(0, params.start_year - params.start_work_year)
@@ -72,10 +71,14 @@ def calculate_yearly_projection(
             if medical_years < MIN_MEDICAL_YEARS:
                 medical_years += 1
 
-        # 个人养老金账户(8%)
-        if not is_retired or need_continue_pay:
-            pension_base = monthly_salary if not is_retired else average_salary
-            personal_pension_account += pension_base * 0.08 * 12
+        # 公积金账户: 每年增长1.5% + 月工资的7%
+        if not is_retired and i > 0:
+            housing_fund = housing_fund * (1 + params.housing_fund_rate / 100) + monthly_salary * 0.07 * 12
+
+        # 退休那年提取公积金到存款
+        if is_retired and housing_fund > 0:
+            savings += housing_fund
+            housing_fund = 0
 
         # 月生活开销(考虑通胀)
         base_expense = average_salary * params.living_expense_ratio
@@ -96,12 +99,8 @@ def calculate_yearly_projection(
         # 存款累计
         savings = savings * (1 + params.deposit_rate / 100) + annual_savings
 
-        # 公积金增长
-        if not is_retired and i > 0:
-            housing_fund = housing_fund * (1 + params.housing_fund_rate / 100)
-
         # 总资产
-        total_assets = savings + housing_fund + personal_pension_account
+        total_assets = savings + housing_fund
 
         data.append(YearlyData(
             year=year,
@@ -110,7 +109,7 @@ def calculate_yearly_projection(
             monthly_salary=round(monthly_salary if not is_retired else 0, 2),
             contribution_base=round(contribution_base, 2),
             pension_contribution=round(pension_contribution, 2),
-            personal_pension_account=round(personal_pension_account, 2),
+            housing_fund_account=round(housing_fund, 2),
             pension_years=pension_years,
             medical_years=medical_years,
             can_receive_pension=can_receive_pension,

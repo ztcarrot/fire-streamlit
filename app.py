@@ -197,17 +197,12 @@ with st.sidebar:
 
     # 初始资产
     with st.expander("💎 初始资产", expanded=True):
-        col1, col2 = st.columns(2)
-        with col1:
-            initial_savings = text_input_number("初始存款(元)", 'initial_savings', get_param('initial_savings', 1000000, 'int'), 'int',
-                                         help="当前银行存款总额")
-            initial_housing_fund = text_input_number("初始公积金(元)", 'initial_housing_fund', get_param('initial_housing_fund', 150000, 'int'), 'int',
-                                              help="当前公积金账户余额")
-        with col2:
-            housing_fund_rate = text_input_number("公积金年增长率(%)", 'housing_fund_rate', get_param('housing_fund_rate', 1.5, 'float'), 'float',
+        initial_savings = text_input_number("初始存款(元)", 'initial_savings', get_param('initial_savings', 1000000, 'int'), 'int',
+                                     help="当前银行存款总额")
+        initial_housing_fund = text_input_number("初始公积金(元)", 'initial_housing_fund', get_param('initial_housing_fund', 150000, 'int'), 'int',
+                                      help="当前公积金账户余额")
+        housing_fund_rate = text_input_number("公积金年增长率(%)", 'housing_fund_rate', get_param('housing_fund_rate', 1.5, 'float'), 'float',
                                      help="预期公积金年增长率")
-            initial_personal_pension = text_input_number("个人养老金账户初始值(元)", 'initial_personal_pension', get_param('initial_personal_pension', 0, 'int'), 'int',
-                                                   help="个人养老金账户初始金额")
 
 
     st.divider()
@@ -234,7 +229,7 @@ with st.sidebar:
                     initial_savings=float(initial_savings),
                     initial_housing_fund=float(initial_housing_fund),
                     housing_fund_rate=float(housing_fund_rate),
-                    initial_personal_pension=float(initial_personal_pension)
+                    initial_personal_pension=0.0  # 已废弃，保留默认值
                 )
                 save_preset(new_preset_name, current_params, new_preset_desc)
                 st.success(f"✓ 预设 '{new_preset_name}' 已保存!")
@@ -296,7 +291,7 @@ params = FinanceParams(
     initial_savings=float(initial_savings),
     initial_housing_fund=float(initial_housing_fund),
     housing_fund_rate=float(housing_fund_rate),
-    initial_personal_pension=float(initial_personal_pension)
+    initial_personal_pension=0.0  # 已废弃，保留默认值
 )
 
 # 自动计算(实时) - 不使用缓存以避免哈希问题
@@ -326,7 +321,7 @@ df_data = [{
     "月平均工资": f"¥{d.average_salary/10000:.2f}万",
     "月薪": f"¥{d.monthly_salary/10000:.2f}万",
     "年养老金缴纳": f"¥{d.pension_contribution/10000:.2f}万",
-    "个人养老金账户": f"¥{d.personal_pension_account/10000:.2f}万",
+    "公积金账户": f"¥{d.housing_fund_account/10000:.2f}万",
     "养老金年数": d.pension_years,
     "医保年数": d.medical_years,
     "可领养老金": "✓" if d.can_receive_pension else "",

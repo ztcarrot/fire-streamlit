@@ -83,7 +83,7 @@ def export_to_excel(
             "月薪": d.monthly_salary,
             "缴费基数": d.contribution_base,
             "年养老金缴纳": d.pension_contribution,
-            "个人养老金账户": d.personal_pension_account,
+            "公积金账户": d.housing_fund_account,
             "养老金年数": d.pension_years,
             "医保年数": d.medical_years,
             "可领养老金": "是" if d.can_receive_pension else "否",
