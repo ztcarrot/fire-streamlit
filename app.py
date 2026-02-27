@@ -13,8 +13,19 @@ st.set_page_config(
 
 st.title("家庭收支预测系统 - Streamlit版")
 
+# 顶部快捷链接
+col1, col2, col3 = st.columns([3, 1, 1])
+with col1:
+    st.markdown("💡 **实时计算**: 修改左侧参数后,右侧数据和图表会自动刷新")
+with col2:
+    if st.button("📖 参数说明"):
+        st.switch_page("PARAMETERS_GUIDE.md")
+with col3:
+    if st.button("❓ 使用帮助"):
+        st.switch_page("README.md")
+
 # 使用说明
-with st.expander("💡 使用说明"):
+with st.expander("💡 使用说明", expanded=False):
     st.markdown("""
     ### 计算说明
     - **灵活就业缴纳**: 按缴费基数的30%缴纳(20%养老保险 + 10%医疗保险)
@@ -28,6 +39,7 @@ with st.expander("💡 使用说明"):
     - 提前退休需继续缴纳直至满足最低年限
 
     ### 功能说明
+    - **实时计算**: 修改任意参数,结果立即更新
     - **参数预设**: 保存常用的参数配置,快速切换场景
     - **多场景对比**: 同时查看多个场景的预测结果
     - **数据导出**: 将计算结果导出为 Excel 文件
@@ -35,69 +47,87 @@ with st.expander("💡 使用说明"):
 
 # 侧边栏参数输入
 with st.sidebar:
-    st.header("参数设置")
+    st.header("📊 参数设置")
 
     # 预设管理
     presets = load_presets()
     preset_names = list(presets.keys())
-    selected_preset = st.selectbox("选择预设", ["默认"] + preset_names)
+    selected_preset = st.selectbox("🎯 快速加载预设", ["默认"] + preset_names)
 
+    # 如果选择了预设,显示说明和加载按钮
     if selected_preset != "默认":
         preset_data = presets[selected_preset]
-        st.info(f"说明: {preset_data.get('description', '无')}")
+        with st.container():
+            st.info(f"📝 {preset_data.get('description', '无')}")
 
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("加载此预设", key="load_preset"):
-                loaded_params = params_from_dict(preset_data['params'])
-                st.session_state['loaded_params'] = loaded_params
-                st.success("预设已加载,请点击计算")
-        with col2:
-            if selected_preset not in ["保守策略", "中性策略", "乐观策略"] and st.button("删除预设", key="delete_preset"):
-                delete_preset(selected_preset)
-                st.rerun()
+            # 显示预设的关键参数
+            with st.expander("查看预设详情", expanded=False):
+                params_info = preset_data['params']
+                st.markdown(f"""
+                - 工资增长率: **{params_info['salary_growth_rate']}%**
+                - 生活开销: **{int(params_info['living_expense_ratio']*100)}%**
+                - 存款利率: **{params_info['deposit_rate']}%**
+                - 通胀率: **{params_info['inflation_rate']}%**
+                """)
+
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("✅ 加载", key="load_preset", use_container_width=True):
+                    # 将预设参数保存到 session_state
+                    for key, value in preset_data['params'].items():
+                        st.session_state[f'param_{key}'] = value
+                    st.success("✓ 预设已加载!")
+                    st.rerun()
+            with col2:
+                if selected_preset not in ["保守策略", "中性策略", "乐观策略"] and st.button("🗑️ 删除", key="delete_preset", use_container_width=True):
+                    delete_preset(selected_preset)
+                    st.rerun()
 
     st.divider()
 
     # 基础参数
-    st.subheader("基础参数")
-    start_year = st.number_input("起始年份", value=2025, min_value=2000, max_value=2100)
-    start_work_year = st.number_input("开始工作年份", value=2015, min_value=1980, max_value=2030)
-    current_age = st.number_input("当前年龄", value=34, min_value=18, max_value=80)
-    retirement_age = st.number_input("退休年龄", value=34, min_value=18, max_value=80)
+    st.subheader("📅 基础参数")
+    # 从 session_state 获取值,如果没有则使用默认值
+    def get_param(key, default):
+        return st.session_state.get(f'param_{key}', default)
 
-    st.subheader("薪资参数")
-    initial_monthly_salary = st.number_input("当前月薪(元)", value=31500, min_value=0, step=1000)
-    local_average_salary = st.number_input("当地月平均工资(元)", value=12307, min_value=0, step=100)
+    start_year = st.number_input("起始年份", value=get_param('start_year', 2025), min_value=2000, max_value=2100, key='param_start_year')
+    start_work_year = st.number_input("开始工作年份", value=get_param('start_work_year', 2015), min_value=1980, max_value=2030, key='param_start_work_year')
+    current_age = st.number_input("当前年龄", value=get_param('current_age', 34), min_value=18, max_value=80, key='param_current_age')
+    retirement_age = st.number_input("退休年龄", value=get_param('retirement_age', 55), min_value=18, max_value=80, key='param_retirement_age')
 
-    st.subheader("高级参数")
-    salary_growth_rate = st.number_input("工资年增长率(%)", value=4.0, min_value=0.0, max_value=20.0, step=0.5)
-    pension_replacement_ratio = st.number_input("养老金替代率(%)", value=40.0, min_value=0.0, max_value=100.0) / 100
-    contribution_ratio = st.number_input("灵活就业缴纳比例", value=0.6, min_value=0.6, max_value=3.0, step=0.1)
-    living_expense_ratio = st.number_input("生活开销/当地平均工资", value=0.5, min_value=0.0, max_value=2.0, step=0.1)
-    deposit_rate = st.number_input("存款年利率(%)", value=2.0, min_value=0.0, max_value=10.0, step=0.5)
-    inflation_rate = st.number_input("物价增长率(%)", value=3.0, min_value=0.0, max_value=10.0, step=0.5)
+    st.subheader("💰 薪资参数")
+    initial_monthly_salary = st.number_input("当前月薪(元)", value=get_param('initial_monthly_salary', 31500), min_value=0, step=1000, key='param_initial_monthly_salary')
+    local_average_salary = st.number_input("当地月平均工资(元)", value=get_param('local_average_salary', 12307), min_value=0, step=100, key='param_local_average_salary')
 
-    st.subheader("初始资产")
-    initial_savings = st.number_input("初始存款(元)", value=2800000, min_value=0, step=10000)
-    initial_housing_fund = st.number_input("初始公积金(元)", value=370000, min_value=0, step=10000)
-    housing_fund_rate = st.number_input("公积金年增长率(%)", value=1.5, min_value=0.0, max_value=15.0, step=0.5)
-    initial_personal_pension = st.number_input("个人养老金账户初始值(元)", value=0, min_value=0, step=1000)
+    with st.expander("🔧 高级参数", expanded=False):
+        salary_growth_rate = st.number_input("工资年增长率(%)", value=get_param('salary_growth_rate', 4.0), min_value=0.0, max_value=20.0, step=0.5, key='param_salary_growth_rate')
+        pension_replacement_ratio = st.number_input("养老金替代率(%)", value=get_param('pension_replacement_ratio', 40.0), min_value=0.0, max_value=100.0, step=1.0, key='param_pension_replacement_ratio') / 100
+        contribution_ratio = st.number_input("灵活就业缴纳比例", value=get_param('contribution_ratio', 0.6), min_value=0.6, max_value=3.0, step=0.1, key='param_contribution_ratio')
+        living_expense_ratio = st.number_input("生活开销/当地平均工资", value=get_param('living_expense_ratio', 0.5), min_value=0.0, max_value=2.0, step=0.1, key='param_living_expense_ratio')
+        deposit_rate = st.number_input("存款年利率(%)", value=get_param('deposit_rate', 2.0), min_value=0.0, max_value=10.0, step=0.5, key='param_deposit_rate')
+        inflation_rate = st.number_input("物价增长率(%)", value=get_param('inflation_rate', 3.0), min_value=0.0, max_value=10.0, step=0.5, key='param_inflation_rate')
+
+    st.subheader("💎 初始资产")
+    initial_savings = st.number_input("初始存款(元)", value=get_param('initial_savings', 2800000), min_value=0, step=10000, key='param_initial_savings', format="%d")
+    initial_housing_fund = st.number_input("初始公积金(元)", value=get_param('initial_housing_fund', 370000), min_value=0, step=10000, key='param_initial_housing_fund', format="%d")
+    housing_fund_rate = st.number_input("公积金年增长率(%)", value=get_param('housing_fund_rate', 1.5), min_value=0.0, max_value=15.0, step=0.5, key='param_housing_fund_rate')
+    initial_personal_pension = st.number_input("个人养老金账户初始值(元)", value=get_param('initial_personal_pension', 0), min_value=0, step=1000, key='param_initial_personal_pension', format="%d")
 
     st.divider()
-    st.subheader("保存预设")
+    st.subheader("💾 保存预设")
     with st.expander("保存当前参数为预设"):
-        new_preset_name = st.text_input("预设名称")
-        new_preset_desc = st.text_input("预设说明")
-        if st.button("保存预设"):
+        new_preset_name = st.text_input("预设名称", key="new_preset_name")
+        new_preset_desc = st.text_input("预设说明", key="new_preset_desc")
+        if st.button("💾 保存预设", key="save_preset_btn"):
             if new_preset_name:
                 save_preset(new_preset_name, params, new_preset_desc)
-                st.success(f"预设 '{new_preset_name}' 已保存!")
+                st.success(f"✓ 预设 '{new_preset_name}' 已保存!")
             else:
                 st.error("请输入预设名称")
 
     st.divider()
-    st.subheader("场景对比")
+    st.subheader("📊 场景对比")
 
     # 选择要对比的场景
     compare_scenarios = st.multiselect(
@@ -107,24 +137,30 @@ with st.sidebar:
     )
 
     st.divider()
-    st.subheader("数据管理")
+    st.subheader("📁 数据管理")
 
     # 导入参数
-    uploaded_file = st.file_uploader("导入参数配置", type=['xlsx', 'xls'])
+    uploaded_file = st.file_uploader("导入参数配置", type=['xlsx', 'xls'], key="file_uploader")
     if uploaded_file is not None:
         try:
             imported_params = import_params_from_excel(uploaded_file)
-            st.success("参数导入成功!")
-            st.json(imported_params)
+            st.success("✓ 参数导入成功!")
+            with st.expander("查看导入的参数", expanded=False):
+                st.json(imported_params)
+
+            if st.button("应用导入的参数", key="apply_imported"):
+                for key, value in imported_params.items():
+                    st.session_state[f'param_{key}'] = value
+                st.rerun()
         except Exception as e:
             st.error(f"导入失败: {str(e)}")
 
 # 创建参数对象
 params = FinanceParams(
-    start_year=start_year,
-    start_work_year=start_work_year,
-    current_age=current_age,
-    retirement_age=retirement_age,
+    start_year=int(start_year),
+    start_work_year=int(start_work_year),
+    current_age=int(current_age),
+    retirement_age=int(retirement_age),
     initial_monthly_salary=float(initial_monthly_salary),
     local_average_salary=float(local_average_salary),
     salary_growth_rate=float(salary_growth_rate),
@@ -139,57 +175,59 @@ params = FinanceParams(
     initial_personal_pension=float(initial_personal_pension)
 )
 
-# 计算按钮
-if st.button("计算预测", type="primary"):
-    with st.spinner("计算中..."):
-        yearly_data = calculate_yearly_projection(params)
-        st.session_state['yearly_data'] = yearly_data  # 保存到 session state
-        st.session_state['current_params'] = params
+# 自动计算(实时)
+@st.cache_data(ttl=60)
+def cached_calculation(p):
+    return calculate_yearly_projection(p)
 
+yearly_data = cached_calculation(params)
 
-    # 显示关键指标
-    retirement_data = next((d for d in yearly_data if d.age == retirement_age), None)
-    if retirement_data:
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("退休年龄", f"{retirement_age}岁")
-        col2.metric("退休年份", f"{retirement_data.year}年")
-        col3.metric("退休时存款", f"¥{retirement_data.savings/10000:.2f}万")
-        col4.metric("退休时总资产", f"¥{retirement_data.total_assets/10000:.2f}万")
+# 显示关键指标
+retirement_data = next((d for d in yearly_data if d.age == retirement_age), None)
+if retirement_data:
+    st.markdown("---")
+    st.subheader("🎯 关键指标预测")
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("📅 退休年龄", f"{retirement_age}岁")
+    col2.metric("📆 退休年份", f"{retirement_data.year}年")
+    col3.metric("💵 退休时存款", f"¥{retirement_data.savings/10000:.2f}万")
+    col4.metric("💰 退休时总资产", f"¥{retirement_data.total_assets/10000:.2f}万")
 
-    # 显示图表
-    st.subheader("资产趋势图")
-    fig = create_asset_chart(yearly_data)
-    st.plotly_chart(fig, use_container_width=True)
+# 显示图表
+st.subheader("📈 资产趋势图")
+fig = create_asset_chart(yearly_data)
+st.plotly_chart(fig, use_container_width=True)
 
-    # 显示数据表格
-    st.subheader("年度收支预测")
-    df_data = [{
-        "年份": d.year,
-        "年龄": d.age,
-        "月平均工资": f"¥{d.average_salary/10000:.2f}万",
-        "月薪": f"¥{d.monthly_salary/10000:.2f}万",
-        "年养老金缴纳": f"¥{d.pension_contribution/10000:.2f}万",
-        "个人养老金账户": f"¥{d.personal_pension_account/10000:.2f}万",
-        "养老金年数": d.pension_years,
-        "医保年数": d.medical_years,
-        "可领养老金": "✓" if d.can_receive_pension else "",
-        "年领取养老金": f"¥{d.annual_pension_received/10000:.2f}万" if d.annual_pension_received > 0 else "-",
-        "年生活开销": f"¥{d.living_expense/10000:.2f}万",
-        "存款": f"¥{d.savings/10000:.2f}万",
-        "总资产": f"¥{d.total_assets/10000:.2f}万"
-    } for d in yearly_data]
+# 显示数据表格
+st.subheader("📋 年度收支预测表")
+df_data = [{
+    "年份": d.year,
+    "年龄": d.age,
+    "月平均工资": f"¥{d.average_salary/10000:.2f}万",
+    "月薪": f"¥{d.monthly_salary/10000:.2f}万",
+    "年养老金缴纳": f"¥{d.pension_contribution/10000:.2f}万",
+    "个人养老金账户": f"¥{d.personal_pension_account/10000:.2f}万",
+    "养老金年数": d.pension_years,
+    "医保年数": d.medical_years,
+    "可领养老金": "✓" if d.can_receive_pension else "",
+    "年领取养老金": f"¥{d.annual_pension_received/10000:.2f}万" if d.annual_pension_received > 0 else "-",
+    "年生活开销": f"¥{d.living_expense/10000:.2f}万",
+    "存款": f"¥{d.savings/10000:.2f}万",
+    "总资产": f"¥{d.total_assets/10000:.2f}万"
+} for d in yearly_data]
 
-    st.dataframe(df_data, use_container_width=True)
+st.dataframe(df_data, use_container_width=True, height=400)
 
-    # 导出按钮
-    st.divider()
-    st.subheader("导出数据")
-    if st.button("导出结果到 Excel", key="export"):
+# 导出按钮
+st.divider()
+col1, col2 = st.columns([1, 5])
+with col1:
+    if st.button("📥 导出结果到 Excel", type="primary"):
         output_file = "家庭收支预测结果.xlsx"
         export_to_excel(yearly_data, params, output_file)
         with open(output_file, 'rb') as f:
             st.download_button(
-                label="下载 Excel 文件",
+                label="⬇️ 下载 Excel 文件",
                 data=f,
                 file_name=output_file,
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -197,8 +235,8 @@ if st.button("计算预测", type="primary"):
 
 # 多场景对比
 if compare_scenarios:
-    st.divider()
-    st.subheader("多场景对比分析")
+    st.markdown("---")
+    st.subheader("🔍 多场景对比分析")
 
     # 加载选定场景的参数
     scenario_params = {}
@@ -216,7 +254,7 @@ if compare_scenarios:
     st.plotly_chart(fig, use_container_width=True)
 
     # 显示对比表格
-    st.subheader("关键指标对比")
+    st.subheader("📊 关键指标对比")
     comparison_data = []
     for name, results in scenario_results.items():
         retirement_data = next((d for d in results if d.is_retirement_year), None)
