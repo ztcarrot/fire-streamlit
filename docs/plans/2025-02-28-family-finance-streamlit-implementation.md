@@ -319,7 +319,7 @@ with st.sidebar:
     retirement_age = st.number_input("退休年龄", value=34, min_value=18, max_value=80)
 
     st.subheader("薪资参数")
-    initial_monthly_salary = st.number_input("当前月薪(元)", value=31500, min_value=0, step=1000)
+    initial_monthly_salary = st.number_input("当前月薪(元)", value=10000, min_value=0, step=1000)
     local_average_salary = st.number_input("当地月平均工资(元)", value=12307, min_value=0, step=100)
 
     st.subheader("高级参数")
@@ -331,8 +331,8 @@ with st.sidebar:
     inflation_rate = st.number_input("物价增长率(%)", value=3.0, min_value=0.0, max_value=10.0, step=0.5)
 
     st.subheader("初始资产")
-    initial_savings = st.number_input("初始存款(元)", value=2800000, min_value=0, step=10000)
-    initial_housing_fund = st.number_input("初始公积金(元)", value=370000, min_value=0, step=10000)
+    initial_savings = st.number_input("初始存款(元)", value=1000000, min_value=0, step=10000)
+    initial_housing_fund = st.number_input("初始公积金(元)", value=150000, min_value=0, step=10000)
     housing_fund_rate = st.number_input("公积金年增长率(%)", value=1.5, min_value=0.0, max_value=15.0, step=0.5)
     initial_personal_pension = st.number_input("个人养老金账户初始值(元)", value=0, min_value=0, step=1000)
 
@@ -574,7 +574,7 @@ DEFAULT_PRESETS = {
             "start_work_year": 2015,
             "current_age": 34,
             "retirement_age": 55,
-            "initial_monthly_salary": 31500,
+            "initial_monthly_salary": 10000,
             "local_average_salary": 12307,
             "salary_growth_rate": 2.0,
             "pension_replacement_ratio": 0.4,
@@ -582,8 +582,8 @@ DEFAULT_PRESETS = {
             "living_expense_ratio": 0.6,
             "deposit_rate": 1.5,
             "inflation_rate": 3.5,
-            "initial_savings": 2800000,
-            "initial_housing_fund": 370000,
+            "initial_savings": 1000000,
+            "initial_housing_fund": 150000,
             "housing_fund_rate": 1.5,
             "initial_personal_pension": 0
         }
@@ -595,7 +595,7 @@ DEFAULT_PRESETS = {
             "start_work_year": 2015,
             "current_age": 34,
             "retirement_age": 55,
-            "initial_monthly_salary": 31500,
+            "initial_monthly_salary": 10000,
             "local_average_salary": 12307,
             "salary_growth_rate": 4.0,
             "pension_replacement_ratio": 0.4,
@@ -603,8 +603,8 @@ DEFAULT_PRESETS = {
             "living_expense_ratio": 0.5,
             "deposit_rate": 2.0,
             "inflation_rate": 3.0,
-            "initial_savings": 2800000,
-            "initial_housing_fund": 370000,
+            "initial_savings": 1000000,
+            "initial_housing_fund": 150000,
             "housing_fund_rate": 1.5,
             "initial_personal_pension": 0
         }
@@ -616,7 +616,7 @@ DEFAULT_PRESETS = {
             "start_work_year": 2015,
             "current_age": 34,
             "retirement_age": 55,
-            "initial_monthly_salary": 31500,
+            "initial_monthly_salary": 10000,
             "local_average_salary": 12307,
             "salary_growth_rate": 6.0,
             "pension_replacement_ratio": 0.4,
@@ -624,8 +624,8 @@ DEFAULT_PRESETS = {
             "living_expense_ratio": 0.4,
             "deposit_rate": 3.0,
             "inflation_rate": 2.0,
-            "initial_savings": 2800000,
-            "initial_housing_fund": 370000,
+            "initial_savings": 1000000,
+            "initial_housing_fund": 150000,
             "housing_fund_rate": 1.5,
             "initial_personal_pension": 0
         }
