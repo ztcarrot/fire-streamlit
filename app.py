@@ -3,6 +3,7 @@ from src.models import FinanceParams
 from src.calculator import calculate_yearly_projection, calculate_scenarios
 from src.ui.charts import create_asset_chart, create_multi_scenario_chart
 from src.utils.presets import load_presets, save_preset, delete_preset, params_from_dict, get_preset
+from src.utils.file_handler import export_to_excel, import_params_from_excel
 
 st.set_page_config(
     page_title="家庭收支预测系统",
@@ -85,6 +86,19 @@ with st.sidebar:
         default=[]
     )
 
+    st.divider()
+    st.subheader("数据管理")
+
+    # 导入参数
+    uploaded_file = st.file_uploader("导入参数配置", type=['xlsx', 'xls'])
+    if uploaded_file is not None:
+        try:
+            imported_params = import_params_from_excel(uploaded_file)
+            st.success("参数导入成功!")
+            st.json(imported_params)
+        except Exception as e:
+            st.error(f"导入失败: {str(e)}")
+
 # 创建参数对象
 params = FinanceParams(
     start_year=start_year,
@@ -109,6 +123,9 @@ params = FinanceParams(
 if st.button("计算预测", type="primary"):
     with st.spinner("计算中..."):
         yearly_data = calculate_yearly_projection(params)
+        st.session_state['yearly_data'] = yearly_data  # 保存到 session state
+        st.session_state['current_params'] = params
+
 
     # 显示关键指标
     retirement_data = next((d for d in yearly_data if d.age == retirement_age), None)
@@ -143,6 +160,20 @@ if st.button("计算预测", type="primary"):
     } for d in yearly_data]
 
     st.dataframe(df_data, use_container_width=True)
+
+    # 导出按钮
+    st.divider()
+    st.subheader("导出数据")
+    if st.button("导出结果到 Excel", key="export"):
+        output_file = "家庭收支预测结果.xlsx"
+        export_to_excel(yearly_data, params, output_file)
+        with open(output_file, 'rb') as f:
+            st.download_button(
+                label="下载 Excel 文件",
+                data=f,
+                file_name=output_file,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 
 # 多场景对比
 if compare_scenarios:
