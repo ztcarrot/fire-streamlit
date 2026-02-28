@@ -174,7 +174,17 @@ with st.sidebar:
         local_average_salary = text_input_number("当地月平均工资(元)", 'local_average_salary', get_param('local_average_salary', 12307, 'int'), 'int',
                                            help="社保缴费基数参考")
 
-    with st.expander("🔧 高级参数", expanded=False):
+    # 初始资产
+    with st.expander("💎 初始资产", expanded=True):
+        initial_savings = text_input_number("初始存款(元)", 'initial_savings', get_param('initial_savings', 1000000, 'int'), 'int',
+                                     help="当前银行存款总额")
+        initial_housing_fund = text_input_number("初始公积金(元)", 'initial_housing_fund', get_param('initial_housing_fund', 150000, 'int'), 'int',
+                                      help="当前公积金账户余额")
+        housing_fund_rate = text_input_number("公积金年增长率(%)", 'housing_fund_rate', get_param('housing_fund_rate', 1.5, 'float'), 'float',
+                                     help="预期公积金年增长率")
+
+    # 高级参数
+    with st.expander("🔧 高级参数", expanded=True):
         col1, col2 = st.columns(2)
         with col1:
             salary_growth_rate = text_input_number("工资年增长率(%)", 'salary_growth_rate', get_param('salary_growth_rate', 4.0, 'float'), 'float',
@@ -198,15 +208,6 @@ with st.sidebar:
         st.info("📊 **物价增长率**: 已固定为 0%")
         st.caption("💡 物价增长率已经由工资增长率近似")
         inflation_rate = 0.0  # 固定为0
-
-    # 初始资产
-    with st.expander("💎 初始资产", expanded=True):
-        initial_savings = text_input_number("初始存款(元)", 'initial_savings', get_param('initial_savings', 1000000, 'int'), 'int',
-                                     help="当前银行存款总额")
-        initial_housing_fund = text_input_number("初始公积金(元)", 'initial_housing_fund', get_param('initial_housing_fund', 150000, 'int'), 'int',
-                                      help="当前公积金账户余额")
-        housing_fund_rate = text_input_number("公积金年增长率(%)", 'housing_fund_rate', get_param('housing_fund_rate', 1.5, 'float'), 'float',
-                                     help="预期公积金年增长率")
 
 
     st.divider()
