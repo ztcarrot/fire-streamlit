@@ -171,7 +171,7 @@ with st.sidebar:
     with st.expander("💰 薪资参数", expanded=True):
         initial_monthly_salary = text_input_number("当前月薪(元)", 'initial_monthly_salary', get_param('initial_monthly_salary', 10000, 'int'), 'int',
                                              help="当前月税前收入")
-        local_average_salary = text_input_number("当地月平均工资(元)", 'local_average_salary', get_param('local_average_salary', 12307, 'int'), 'int',
+        local_average_salary = text_input_number("当地月平均工资(元)", 'local_average_salary', get_param('local_average_salary', 12434, 'int'), 'int',
                                            help="社保缴费基数参考")
 
     # 初始资产
