@@ -131,5 +131,13 @@ def delete_preset(name: str):
 
 
 def params_from_dict(params_dict: Dict[str, Any]) -> FinanceParams:
-    """从字典创建参数对象"""
+    """从字典创建参数对象
+
+    兼容旧配置：如果缺少 official_retirement_age，使用默认值60
+    """
+    # 确保包含新参数，如果不存在则使用默认值
+    if 'official_retirement_age' not in params_dict:
+        params_dict = params_dict.copy()  # 避免修改原始字典
+        params_dict['official_retirement_age'] = 60
+
     return FinanceParams(**params_dict)
