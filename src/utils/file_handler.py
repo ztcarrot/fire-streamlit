@@ -37,7 +37,7 @@ def export_to_excel(
             "参数值": f"{params.salary_growth_rate}%",
             "说明": "影响未来收入增长、物价和养老金基数"
         }, {
-            "参数名称": "养老金替代率",
+            "参数名称": "预估养老金替代率",
             "参数值": f"{params.pension_replacement_ratio*100}%",
             "说明": "退休后养老金占平均工资比例"
         }, {
@@ -221,7 +221,7 @@ def export_user_params_and_presets(params: FinanceParams, output_path: str):
             "参数值": f"{params.salary_growth_rate}%",
             "说明": "影响未来收入增长、物价和养老金基数"
         }, {
-            "参数名称": "养老金替代率",
+            "参数名称": "预估养老金替代率",
             "参数值": f"{params.pension_replacement_ratio:.4f}",
             "说明": "退休后养老金占平均工资比例（如0.4表示40%）"
         }, {

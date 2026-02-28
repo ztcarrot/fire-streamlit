@@ -195,8 +195,15 @@ with st.sidebar:
 
         col1, col2 = st.columns(2)
         with col1:
-            pension_replacement_ratio = text_input_number("养老金替代率", 'pension_replacement_ratio', get_param('pension_replacement_ratio', 0.4, 'float'), 'float',
-                                                help="退休后养老金占平均工资的比例（如：0.4 表示 40%）")
+            pension_replacement_ratio = text_input_number("预估养老金替代率", 'pension_replacement_ratio', get_param('pension_replacement_ratio', 0.4, 'float'), 'float',
+                                                help="""退休后养老金占平均工资的比例（如：0.4 表示 40%）
+
+💡 **上海市养老金计算公式**：
+• 基础养老金 = (当地平均工资 + 指数化月平均缴费工资) ÷ 2 × 缴费年限 × 1%
+• 个人账户养老金 = 个人账户储存额 ÷ 139（60岁退休）
+• 总养老金 = 基础养老金 + 个人账户养老金
+
+预估替代率 = 月养老金 ÷ 当地月平均工资""")
             # 显示计算后的等效当前月养老金
             monthly_pension = pension_replacement_ratio * local_average_salary
             st.caption(f"💵 等效当前月养老金: ¥{monthly_pension:,.0f} 元")
@@ -333,7 +340,7 @@ with st.sidebar:
                                 '当前月薪(元)': 'initial_monthly_salary',
                                 '当地月平均工资(元)': 'local_average_salary',
                                 '预估工资和物价年增长率(%)': 'salary_growth_rate',
-                                '养老金替代率': 'pension_replacement_ratio',
+                                '预估养老金替代率': 'pension_replacement_ratio',
                                 '灵活就业缴纳比例': 'contribution_ratio',
                                 '消费系数': 'living_expense_ratio',
                                 '预计存款年利率(%)': 'deposit_rate',
@@ -519,7 +526,7 @@ if compare_scenarios:
                     "提前退休年份": retirement_data.year,
                     "正式退休年龄": f"{scenario_params_obj.official_retirement_age}岁",
                     "预估工资和物价年增长率": f"{scenario_params_obj.salary_growth_rate}%",
-                    "养老金替代率": f"{scenario_params_obj.pension_replacement_ratio:.0%}",
+                    "预估养老金替代率": f"{scenario_params_obj.pension_replacement_ratio:.0%}",
                     "消费系数": f"{scenario_params_obj.living_expense_ratio:.0%}",
                     "预计存款年利率": f"{scenario_params_obj.deposit_rate}%",
                     "退休时存款": f"¥{retirement_data.savings/10000:.2f}万",
