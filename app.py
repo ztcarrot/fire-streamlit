@@ -15,7 +15,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("家庭收支预测系统 - Streamlit版")
+st.title("家庭收支预测系统")
 
 # 初始化 session state
 if 'show_param_guide' not in st.session_state:
