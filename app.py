@@ -204,9 +204,6 @@ with st.sidebar:
         contribution_ratio = text_input_number("灵活就业缴纳比例", 'contribution_ratio', get_param('contribution_ratio', 0.6, 'float'), 'float',
                                        help="社保缴费基数比例(0.6-3.0)")
 
-        # 物价增长率固定为0，不可编辑
-        st.info("📊 **物价增长率**: 已固定为 0%")
-        st.caption("💡 物价增长率已经由工资增长率近似")
         inflation_rate = 0.0  # 固定为0
 
 
