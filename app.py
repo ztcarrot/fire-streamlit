@@ -123,7 +123,7 @@ with st.sidebar:
             start_year = text_input_number("起始年份（默认今年）", 'start_year', get_param('start_year', CURRENT_YEAR, 'int'), 'int')
             current_age = text_input_number("当前年龄", 'current_age', get_param('current_age', 34, 'int'), 'int')
         with col2:
-            start_work_year = text_input_number("开始工作年份", 'start_work_year', get_param('start_work_year', CURRENT_YEAR-10, 'int'), 'int')
+            start_work_year = text_input_number("开始工作年份", 'start_work_year', get_param('start_work_year', 2014, 'int'), 'int')
             retirement_age = text_input_number("提前退休年龄", 'retirement_age', get_param('retirement_age', 45, 'int'), 'int',
                                         help="计划提前退休的年龄")
 
