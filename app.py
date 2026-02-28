@@ -379,12 +379,40 @@ if compare_scenarios:
     st.markdown("---")
     st.subheader("🔍 多场景对比分析")
 
-    # 加载选定场景的参数
+    # 显示说明
+    st.info("💡 **对比说明**: 场景对比使用您当前输入的基础参数、薪资参数和初始资产，只从预设中应用高级参数（工资增长率、养老金替代率等）")
+
+    # 合并用户参数和预设高级参数的函数
+    def merge_user_params_with_preset(user_params: FinanceParams, preset_params: dict) -> FinanceParams:
+        """合并用户当前输入的参数和预设的高级参数"""
+        return FinanceParams(
+            # 使用用户的当前输入
+            start_year=user_params.start_year,
+            start_work_year=user_params.start_work_year,
+            current_age=user_params.current_age,
+            retirement_age=user_params.retirement_age,
+            official_retirement_age=user_params.official_retirement_age,
+            initial_monthly_salary=user_params.initial_monthly_salary,
+            local_average_salary=user_params.local_average_salary,
+            initial_savings=user_params.initial_savings,
+            initial_housing_fund=user_params.initial_housing_fund,
+            housing_fund_rate=user_params.housing_fund_rate,
+            initial_personal_pension=user_params.initial_personal_pension,
+            # 从预设中获取高级参数
+            salary_growth_rate=preset_params.get('salary_growth_rate', user_params.salary_growth_rate),
+            pension_replacement_ratio=preset_params.get('pension_replacement_ratio', user_params.pension_replacement_ratio),
+            contribution_ratio=preset_params.get('contribution_ratio', user_params.contribution_ratio),
+            living_expense_ratio=preset_params.get('living_expense_ratio', user_params.living_expense_ratio),
+            deposit_rate=preset_params.get('deposit_rate', user_params.deposit_rate),
+            inflation_rate=preset_params.get('inflation_rate', user_params.inflation_rate)
+        )
+
+    # 创建场景参数：使用用户当前输入 + 预设的高级参数
     scenario_params = {}
     for scenario_name in compare_scenarios:
         preset_data = get_preset(scenario_name)
         if preset_data:
-            scenario_params[scenario_name] = params_from_dict(preset_data['params'])
+            scenario_params[scenario_name] = merge_user_params_with_preset(params, preset_data['params'])
 
     if scenario_params:
         # 计算所有场景
