@@ -197,6 +197,9 @@ with st.sidebar:
         with col1:
             pension_replacement_ratio = text_input_number("养老金替代率", 'pension_replacement_ratio', get_param('pension_replacement_ratio', 0.4, 'float'), 'float',
                                                 help="退休后养老金占平均工资的比例（如：0.4 表示 40%）")
+            # 显示计算后的等效当前月养老金
+            monthly_pension = pension_replacement_ratio * local_average_salary
+            st.caption(f"💵 等效当前月养老金: ¥{monthly_pension:,.0f} 元")
         with col2:
             living_expense_ratio = text_input_number("消费系数", 'living_expense_ratio', get_param('living_expense_ratio', 0.5, 'float'), 'float',
                                      help="月生活开销占当地平均工资的比例")
