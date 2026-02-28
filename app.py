@@ -176,8 +176,18 @@ with st.sidebar:
                     if st.button("✅ 加载", key="load_preset", use_container_width=True):
                         # 将预设参数保存到 session_state
                         for key, value in preset_data['params'].items():
-                            st.session_state[f'param_{key}'] = value
-                            st.session_state[f'text_{key}'] = str(value)
+                            try:
+                                # 保存参数值
+                                st.session_state[f'param_{key}'] = value
+                                # 安全地转换为字符串
+                                if isinstance(value, bool):
+                                    st.session_state[f'text_{key}'] = 'True' if value else 'False'
+                                elif value is None:
+                                    st.session_state[f'text_{key}'] = ''
+                                else:
+                                    st.session_state[f'text_{key}'] = str(value)
+                            except Exception as e:
+                                st.error(f"加载参数 {key} 失败: {str(e)}")
                         st.success("✓ 预设已加载!")
                         st.rerun()
                 with col2:
@@ -357,7 +367,13 @@ with st.sidebar:
                                 if chinese_name in imported_data['user_params']:
                                     value = imported_data['user_params'][chinese_name]
                                     st.session_state[f'param_{english_key}'] = value
-                                    st.session_state[f'text_{english_key}'] = str(value)
+                                    # 安全地转换为字符串
+                                    if isinstance(value, bool):
+                                        st.session_state[f'text_{english_key}'] = 'True' if value else 'False'
+                                    elif value is None:
+                                        st.session_state[f'text_{english_key}'] = ''
+                                    else:
+                                        st.session_state[f'text_{english_key}'] = str(value)
 
                         # 应用自定义预设
                         if 'user_presets' in imported_data:
