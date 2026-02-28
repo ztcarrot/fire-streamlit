@@ -198,8 +198,11 @@ with st.sidebar:
             pension_replacement_ratio = text_input_number("养老金替代率", 'pension_replacement_ratio', get_param('pension_replacement_ratio', 0.4, 'float'), 'float',
                                                 help="退休后养老金占平均工资的比例（如：0.4 表示 40%）")
         with col2:
-            living_expense_ratio = text_input_number("消费水平比例", 'living_expense_ratio', get_param('living_expense_ratio', 0.5, 'float'), 'float',
+            living_expense_ratio = text_input_number("消费系数", 'living_expense_ratio', get_param('living_expense_ratio', 0.5, 'float'), 'float',
                                      help="月生活开销占当地平均工资的比例")
+            # 显示计算后的当前平均年消费金额
+            annual_expense = living_expense_ratio * local_average_salary * 12
+            st.caption(f"💰 当前平均年消费: ¥{annual_expense:,.0f} 元")
 
         contribution_ratio = text_input_number("灵活就业缴纳比例", 'contribution_ratio', get_param('contribution_ratio', 0.6, 'float'), 'float',
                                        help="社保缴费基数比例(0.6-3.0)")
@@ -329,7 +332,7 @@ with st.sidebar:
                                 '工资年增长率(%)': 'salary_growth_rate',
                                 '养老金替代率': 'pension_replacement_ratio',
                                 '灵活就业缴纳比例': 'contribution_ratio',
-                                '消费水平比例': 'living_expense_ratio',
+                                '消费系数': 'living_expense_ratio',
                                 '存款年利率(%)': 'deposit_rate',
                                 '物价增长率(%)': 'inflation_rate',
                                 '初始存款(元)': 'initial_savings',
@@ -514,7 +517,7 @@ if compare_scenarios:
                     "正式退休年龄": f"{scenario_params_obj.official_retirement_age}岁",
                     "工资年增长率": f"{scenario_params_obj.salary_growth_rate}%",
                     "养老金替代率": f"{scenario_params_obj.pension_replacement_ratio:.0%}",
-                    "消费水平比例": f"{scenario_params_obj.living_expense_ratio:.0%}",
+                    "消费系数": f"{scenario_params_obj.living_expense_ratio:.0%}",
                     "存款年利率": f"{scenario_params_obj.deposit_rate}%",
                     "退休时存款": f"¥{retirement_data.savings/10000:.2f}万",
                     "退休时公积金": f"¥{retirement_data.housing_fund_account/10000:.2f}万",

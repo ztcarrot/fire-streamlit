@@ -229,7 +229,7 @@ def export_user_params_and_presets(params: FinanceParams, output_path: str):
             "参数值": params.contribution_ratio,
             "说明": "社保缴费基数比例(0.6-3.0)"
         }, {
-            "参数名称": "消费水平比例",
+            "参数名称": "消费系数",
             "参数值": params.living_expense_ratio,
             "说明": "月生活开销占当地平均工资的比例"
         }, {
