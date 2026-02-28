@@ -1,13 +1,9 @@
-import json
-import os
-from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any
+import streamlit as st
 from ..models import FinanceParams
 
-PRESETS_FILE = Path(__file__).parent.parent.parent / "config" / "presets.json"
-
-# 默认预设
+# 默认预设（只读，每个用户都可见）
 DEFAULT_PRESETS = {
     "保守策略": {
         "description": "低风险场景配置",
@@ -76,30 +72,15 @@ DEFAULT_PRESETS = {
 
 
 def load_presets() -> Dict[str, Any]:
-    """加载所有预设"""
-    if not PRESETS_FILE.exists():
-        save_presets(DEFAULT_PRESETS)
-        return DEFAULT_PRESETS.copy()
+    """加载所有预设（从 session_state，每个用户独立）"""
+    # 初始化 session_state
+    if 'user_presets' not in st.session_state:
+        st.session_state.user_presets = {}
 
-    try:
-        with open(PRESETS_FILE, 'r', encoding='utf-8') as f:
-            content = f.read().strip()
-            if not content:
-                # 文件为空,返回默认预设
-                save_presets(DEFAULT_PRESETS)
-                return DEFAULT_PRESETS.copy()
-            return json.loads(content)
-    except (json.JSONDecodeError, Exception):
-        # 文件损坏或读取失败,返回默认预设
-        save_presets(DEFAULT_PRESETS)
-        return DEFAULT_PRESETS.copy()
-
-
-def save_presets(presets: Dict[str, Any]):
-    """保存所有预设"""
-    PRESETS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(PRESETS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(presets, f, ensure_ascii=False, indent=2)
+    # 合并默认预设和用户自定义预设
+    presets = DEFAULT_PRESETS.copy()
+    presets.update(st.session_state.user_presets)
+    return presets
 
 
 def get_preset(name: str) -> Dict[str, Any]:
@@ -109,9 +90,11 @@ def get_preset(name: str) -> Dict[str, Any]:
 
 
 def save_preset(name: str, params: FinanceParams, description: str = ""):
-    """保存新预设"""
-    presets = load_presets()
-    presets[name] = {
+    """保存新预设（保存到 session_state，每个用户独立）"""
+    if 'user_presets' not in st.session_state:
+        st.session_state.user_presets = {}
+
+    st.session_state.user_presets[name] = {
         "description": description,
         "created_at": datetime.now().strftime("%Y-%m-%d"),
         "params": {
@@ -133,15 +116,15 @@ def save_preset(name: str, params: FinanceParams, description: str = ""):
             "initial_personal_pension": params.initial_personal_pension
         }
     }
-    save_presets(presets)
 
 
 def delete_preset(name: str):
-    """删除预设"""
-    presets = load_presets()
-    if name in presets and name not in DEFAULT_PRESETS:
-        del presets[name]
-        save_presets(presets)
+    """删除预设（从 session_state 删除，每个用户独立）"""
+    if 'user_presets' not in st.session_state:
+        st.session_state.user_presets = {}
+
+    if name in st.session_state.user_presets:
+        del st.session_state.user_presets[name]
 
 
 def params_from_dict(params_dict: Dict[str, Any]) -> FinanceParams:
