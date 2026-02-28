@@ -32,7 +32,6 @@ def calculate_yearly_projection(
 
     MIN_PENSION_YEARS = 20  # 养老金最低缴纳年限
     MIN_MEDICAL_YEARS = 25  # 医保最低缴纳年限
-    PENSION_RECEIVE_AGE = 60  # 领取养老金年龄
 
     # 计算到100岁
     max_age = 100
@@ -75,11 +74,11 @@ def calculate_yearly_projection(
                 medical_years += 1
 
         # 公积金账户: 每年增长1.5% + 月工资的7%
-        if age < 60 and i > 0:
+        if age < params.official_retirement_age and i > 0:
             housing_fund = housing_fund * (1 + params.housing_fund_rate / 100) + monthly_salary * 0.07 * 12
 
         # 60岁退休那年提取公积金到存款
-        if age == 60 and housing_fund > 0:
+        if age == params.official_retirement_age and housing_fund > 0:
             savings += housing_fund
             housing_fund = 0
 
@@ -92,7 +91,7 @@ def calculate_yearly_projection(
         annual_income = monthly_salary * 12 if not is_retired else 0
 
         # 60岁后可以领取养老金
-        can_receive_pension = age >= PENSION_RECEIVE_AGE and pension_years >= MIN_PENSION_YEARS
+        can_receive_pension = age >= params.official_retirement_age and pension_years >= MIN_PENSION_YEARS
         monthly_pension_benefit = average_salary * params.pension_replacement_ratio if can_receive_pension else 0
         annual_pension_benefit = monthly_pension_benefit * 12
 
@@ -121,7 +120,7 @@ def calculate_yearly_projection(
             savings=round(savings, 2),
             total_assets=round(total_assets, 2),
             is_retirement_year=(age == params.retirement_age),
-            is_pension_start_year=(age == PENSION_RECEIVE_AGE and can_receive_pension)
+            is_pension_start_year=(age == params.official_retirement_age and can_receive_pension)
         ))
 
     return data

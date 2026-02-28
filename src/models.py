@@ -8,7 +8,8 @@ class FinanceParams:
     start_year: int
     start_work_year: int
     current_age: int
-    retirement_age: int
+    retirement_age: int  # 提前退休年龄
+    official_retirement_age: int  # 正式退休年龄（领取养老金年龄）
 
     # 薪资参数
     initial_monthly_salary: float

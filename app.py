@@ -161,7 +161,11 @@ with st.sidebar:
             current_age = text_input_number("当前年龄", 'current_age', get_param('current_age', 34, 'int'), 'int')
         with col2:
             start_work_year = text_input_number("开始工作年份", 'start_work_year', get_param('start_work_year', CURRENT_YEAR-10, 'int'), 'int')
-            retirement_age = text_input_number("退休年龄", 'retirement_age', get_param('retirement_age', 45, 'int'), 'int')
+            retirement_age = text_input_number("提前退休年龄", 'retirement_age', get_param('retirement_age', 45, 'int'), 'int',
+                                        help="计划提前退休的年龄")
+
+        official_retirement_age = text_input_number("正式退休年龄", 'official_retirement_age', get_param('official_retirement_age', 60, 'int'), 'int',
+                                          help="正式退休（领取养老金）的年龄，男性60，女性50/55")
 
     # 薪资参数
     with st.expander("💰 薪资参数", expanded=True):
@@ -218,6 +222,7 @@ with st.sidebar:
                     start_work_year=int(start_work_year),
                     current_age=int(current_age),
                     retirement_age=int(retirement_age),
+                    official_retirement_age=int(official_retirement_age),
                     initial_monthly_salary=float(initial_monthly_salary),
                     local_average_salary=float(local_average_salary),
                     salary_growth_rate=float(salary_growth_rate),
@@ -280,6 +285,7 @@ params = FinanceParams(
     start_work_year=int(start_work_year),
     current_age=int(current_age),
     retirement_age=int(retirement_age),
+    official_retirement_age=int(official_retirement_age),
     initial_monthly_salary=float(initial_monthly_salary),
     local_average_salary=float(local_average_salary),
     salary_growth_rate=float(salary_growth_rate),
