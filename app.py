@@ -85,43 +85,6 @@ with st.expander("💡 使用说明", expanded=False):
 with st.sidebar:
     st.header("📊 参数设置")
 
-    # 预设管理
-    presets = load_presets()
-    preset_names = list(presets.keys())
-    selected_preset = st.selectbox("🎯 快速加载预设", ["默认"] + preset_names)
-
-    # 如果选择了预设,显示说明和加载按钮
-    if selected_preset != "默认":
-        preset_data = presets[selected_preset]
-        with st.container():
-            st.info(f"📝 {preset_data.get('description', '无')}")
-
-            # 显示预设的关键参数
-            with st.expander("查看预设详情", expanded=False):
-                params_info = preset_data['params']
-                st.markdown(f"""
-                - 工资增长率: **{params_info['salary_growth_rate']}%**
-                - 生活开销: **{int(params_info['living_expense_ratio']*100)}%**
-                - 存款利率: **{params_info['deposit_rate']}%**
-                - 通胀率: **{params_info['inflation_rate']}%**
-                """)
-
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("✅ 加载", key="load_preset", use_container_width=True):
-                    # 将预设参数保存到 session_state
-                    for key, value in preset_data['params'].items():
-                        st.session_state[f'param_{key}'] = value
-                        st.session_state[f'text_{key}'] = str(value)
-                    st.success("✓ 预设已加载!")
-                    st.rerun()
-            with col2:
-                if selected_preset not in ["保守策略", "中性策略", "乐观策略"] and st.button("🗑️ 删除", key="delete_preset", use_container_width=True):
-                    delete_preset(selected_preset)
-                    st.rerun()
-
-    st.divider()
-
     # 基础参数
     with st.expander("📅 基础参数", expanded=True):
         # 从 session_state 获取值,如果没有则使用默认值
@@ -185,6 +148,46 @@ with st.sidebar:
 
     # 高级参数
     with st.expander("🔧 高级参数", expanded=True):
+        # 预设管理
+        st.markdown("---")
+        st.markdown("### 🎯 快速加载预设")
+        presets = load_presets()
+        preset_names = list(presets.keys())
+        selected_preset = st.selectbox("选择预设", ["默认"] + preset_names, key="preset_selector")
+
+        # 如果选择了预设,显示说明和加载按钮
+        if selected_preset != "默认":
+            preset_data = presets[selected_preset]
+            with st.container():
+                st.info(f"📝 {preset_data.get('description', '无')}")
+
+                # 显示预设的关键参数
+                with st.expander("查看预设详情", expanded=False):
+                    params_info = preset_data['params']
+                    st.markdown(f"""
+                    - 预估工资和物价年增长率: **{params_info['salary_growth_rate']}%**
+                    - 预估养老金替代率: **{int(params_info['pension_replacement_ratio']*100)}%**
+                    - 消费系数: **{int(params_info['living_expense_ratio']*100)}%**
+                    - 预计存款年利率: **{params_info['deposit_rate']}%**
+                    """)
+
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("✅ 加载", key="load_preset", use_container_width=True):
+                        # 将预设参数保存到 session_state
+                        for key, value in preset_data['params'].items():
+                            st.session_state[f'param_{key}'] = value
+                            st.session_state[f'text_{key}'] = str(value)
+                        st.success("✓ 预设已加载!")
+                        st.rerun()
+                with col2:
+                    if selected_preset not in ["保守策略", "中性策略", "乐观策略"] and st.button("🗑️ 删除", key="delete_preset", use_container_width=True):
+                        delete_preset(selected_preset)
+                        st.rerun()
+
+        st.markdown("---")
+        st.markdown("### 📊 高级设置")
+
         col1, col2 = st.columns(2)
         with col1:
             salary_growth_rate = text_input_number("预估工资和物价年增长率(%)", 'salary_growth_rate', get_param('salary_growth_rate', 4.0, 'float'), 'float',
