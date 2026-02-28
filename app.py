@@ -187,10 +187,10 @@ with st.sidebar:
     with st.expander("🔧 高级参数", expanded=True):
         col1, col2 = st.columns(2)
         with col1:
-            salary_growth_rate = text_input_number("工资年增长率(%)", 'salary_growth_rate', get_param('salary_growth_rate', 4.0, 'float'), 'float',
-                                          help="影响未来收入增长和养老金基数")
+            salary_growth_rate = text_input_number("预估工资和物价年增长率(%)", 'salary_growth_rate', get_param('salary_growth_rate', 4.0, 'float'), 'float',
+                                          help="影响未来收入增长、物价和养老金基数")
         with col2:
-            deposit_rate = text_input_number("存款年利率(%)", 'deposit_rate', get_param('deposit_rate', 2.0, 'float'), 'float',
+            deposit_rate = text_input_number("预计存款年利率(%)", 'deposit_rate', get_param('deposit_rate', 2.0, 'float'), 'float',
                                 help="银行存款/理财年化收益率")
 
         col1, col2 = st.columns(2)
@@ -332,11 +332,11 @@ with st.sidebar:
                                 '正式退休年龄': 'official_retirement_age',
                                 '当前月薪(元)': 'initial_monthly_salary',
                                 '当地月平均工资(元)': 'local_average_salary',
-                                '工资年增长率(%)': 'salary_growth_rate',
+                                '预估工资和物价年增长率(%)': 'salary_growth_rate',
                                 '养老金替代率': 'pension_replacement_ratio',
                                 '灵活就业缴纳比例': 'contribution_ratio',
                                 '消费系数': 'living_expense_ratio',
-                                '存款年利率(%)': 'deposit_rate',
+                                '预计存款年利率(%)': 'deposit_rate',
                                 '物价增长率(%)': 'inflation_rate',
                                 '初始存款(元)': 'initial_savings',
                                 '初始公积金(元)': 'initial_housing_fund',
@@ -518,10 +518,10 @@ if compare_scenarios:
                     "提前退休年龄": f"{scenario_params_obj.retirement_age}岁",
                     "提前退休年份": retirement_data.year,
                     "正式退休年龄": f"{scenario_params_obj.official_retirement_age}岁",
-                    "工资年增长率": f"{scenario_params_obj.salary_growth_rate}%",
+                    "预估工资和物价年增长率": f"{scenario_params_obj.salary_growth_rate}%",
                     "养老金替代率": f"{scenario_params_obj.pension_replacement_ratio:.0%}",
                     "消费系数": f"{scenario_params_obj.living_expense_ratio:.0%}",
-                    "存款年利率": f"{scenario_params_obj.deposit_rate}%",
+                    "预计存款年利率": f"{scenario_params_obj.deposit_rate}%",
                     "退休时存款": f"¥{retirement_data.savings/10000:.2f}万",
                     "退休时公积金": f"¥{retirement_data.housing_fund_account/10000:.2f}万",
                     "退休时总资产": f"¥{retirement_data.total_assets/10000:.2f}万",

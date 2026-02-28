@@ -33,9 +33,9 @@ def export_to_excel(
             "参数值": params.local_average_salary,
             "说明": "当地社保平均工资(元)"
         }, {
-            "参数名称": "工资年增长率",
+            "参数名称": "预估工资和物价年增长率",
             "参数值": f"{params.salary_growth_rate}%",
-            "说明": "预期工资年增长率"
+            "说明": "影响未来收入增长、物价和养老金基数"
         }, {
             "参数名称": "养老金替代率",
             "参数值": f"{params.pension_replacement_ratio*100}%",
@@ -49,9 +49,9 @@ def export_to_excel(
             "参数值": params.living_expense_ratio,
             "说明": "生活开销占平均工资比例"
         }, {
-            "参数名称": "存款年利率",
+            "参数名称": "预计存款年利率",
             "参数值": f"{params.deposit_rate}%",
-            "说明": "银行存款年利率"
+            "说明": "银行存款/理财年化收益率"
         }, {
             "参数名称": "物价增长率",
             "参数值": f"{params.inflation_rate}%",
@@ -217,9 +217,9 @@ def export_user_params_and_presets(params: FinanceParams, output_path: str):
             "参数值": params.local_average_salary,
             "说明": "社保缴费基数参考"
         }, {
-            "参数名称": "工资年增长率(%)",
+            "参数名称": "预估工资和物价年增长率(%)",
             "参数值": f"{params.salary_growth_rate}%",
-            "说明": "预期工资年增长率"
+            "说明": "影响未来收入增长、物价和养老金基数"
         }, {
             "参数名称": "养老金替代率",
             "参数值": f"{params.pension_replacement_ratio:.4f}",
@@ -233,7 +233,7 @@ def export_user_params_and_presets(params: FinanceParams, output_path: str):
             "参数值": params.living_expense_ratio,
             "说明": "月生活开销占当地平均工资的比例"
         }, {
-            "参数名称": "存款年利率(%)",
+            "参数名称": "预计存款年利率(%)",
             "参数值": f"{params.deposit_rate}%",
             "说明": "银行存款/理财年化收益率"
         }, {
