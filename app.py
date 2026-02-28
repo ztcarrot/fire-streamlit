@@ -259,26 +259,6 @@ with st.sidebar:
         default=[]
     )
 
-    st.divider()
-    st.subheader("📁 数据管理")
-
-    # 导入参数
-    uploaded_file = st.file_uploader("导入参数配置", type=['xlsx', 'xls'], key="file_uploader")
-    if uploaded_file is not None:
-        try:
-            imported_params = import_params_from_excel(uploaded_file)
-            st.success("✓ 参数导入成功!")
-            with st.expander("查看导入的参数", expanded=False):
-                st.json(imported_params)
-
-            if st.button("应用导入的参数", key="apply_imported"):
-                for key, value in imported_params.items():
-                    st.session_state[f'param_{key}'] = value
-                    st.session_state[f'text_{key}'] = str(value)
-                st.rerun()
-        except Exception as e:
-            st.error(f"导入失败: {str(e)}")
-
 # 创建参数对象
 params = FinanceParams(
     start_year=int(start_year),
@@ -373,6 +353,78 @@ with col1:
                 file_name=output_file,
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+
+# 参数导入导出
+st.divider()
+st.subheader("📁 参数管理")
+
+col1, col2 = st.columns(2)
+with col1:
+    st.markdown("**导出当前参数**")
+    st.info("💡 导出您当前填写的所有参数和自定义预设，方便以后导入使用")
+    if st.button("📤 导出当前参数", key="export_params"):
+        try:
+            from src.utils.file_handler import export_user_params_and_presets
+            import tempfile
+
+            # 创建临时文件
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+                export_user_params_and_presets(params, tmp_file.name)
+
+                # 提供下载
+                with open(tmp_file.name, 'rb') as f:
+                    st.download_button(
+                        label="⬇️ 下载参数文件",
+                        data=f,
+                        file_name="家庭收支预测-参数配置.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+            st.success("✓ 参数导出成功!")
+        except Exception as e:
+            st.error(f"导出失败: {str(e)}")
+            import traceback
+            st.error(traceback.format_exc())
+
+with col2:
+    st.markdown("**导入参数配置**")
+    st.info("💡 从之前导出的 Excel 文件导入参数和预设")
+    uploaded_file = st.file_uploader("选择参数文件", type=['xlsx', 'xls'], key="file_uploader")
+    if uploaded_file is not None:
+        try:
+            from src.utils.file_handler import import_params_from_excel
+            imported_data = import_params_from_excel(uploaded_file)
+            st.success("✓ 文件读取成功!")
+
+            with st.expander("📋 查看导入的内容", expanded=False):
+                if 'user_params' in imported_data:
+                    st.markdown("**用户参数**")
+                    st.json(imported_data['user_params'])
+                if 'user_presets' in imported_data:
+                    st.markdown("**自定义预设**")
+                    for name, data in imported_data['user_presets'].items():
+                        st.markdown(f"- **{name}**: {data.get('description', '')}")
+
+            if st.button("✅ 应用导入的数据并刷新页面", key="apply_imported"):
+                # 应用用户参数
+                if 'user_params' in imported_data:
+                    for key, value in imported_data['user_params'].items():
+                        if key == 'text_':
+                            # 跳过文本输入的内部键
+                            continue
+                        st.session_state[f'param_{key}'] = value
+                        st.session_state[f'text_{key}'] = str(value)
+
+                # 应用自定义预设
+                if 'user_presets' in imported_data:
+                    for preset_name, preset_data in imported_data['user_presets'].items():
+                        st.session_state.user_presets[preset_name] = preset_data
+
+                st.success("✓ 参数已应用! 页面即将刷新...")
+                st.rerun()
+        except Exception as e:
+            st.error(f"导入失败: {str(e)}")
+            import traceback
+            st.error(traceback.format_exc())
 
 # 多场景对比
 if compare_scenarios:
