@@ -428,12 +428,28 @@ if compare_scenarios:
         comparison_data = []
         for name, results in scenario_results.items():
             retirement_data = next((d for d in results if d.is_retirement_year), None)
+            pension_data = next((d for d in results if d.age == scenario_params[name].official_retirement_age), None)
+            final_data = results[-1] if results else None
+            scenario_params_obj = scenario_params[name]
+
             if retirement_data:
                 comparison_data.append({
                     "场景": name,
-                    "退休年份": retirement_data.year,
+                    "提前退休年龄": f"{scenario_params_obj.retirement_age}岁",
+                    "提前退休年份": retirement_data.year,
+                    "正式退休年龄": f"{scenario_params_obj.official_retirement_age}岁",
+                    "工资年增长率": f"{scenario_params_obj.salary_growth_rate}%",
+                    "养老金替代率": f"{scenario_params_obj.pension_replacement_ratio:.0%}",
+                    "消费水平比例": f"{scenario_params_obj.living_expense_ratio:.0%}",
+                    "存款年利率": f"{scenario_params_obj.deposit_rate}%",
                     "退休时存款": f"¥{retirement_data.savings/10000:.2f}万",
-                    "退休时总资产": f"¥{retirement_data.total_assets/10000:.2f}万"
+                    "退休时公积金": f"¥{retirement_data.housing_fund_account/10000:.2f}万",
+                    "退休时总资产": f"¥{retirement_data.total_assets/10000:.2f}万",
+                    "年生活开销": f"¥{retirement_data.living_expense/10000:.2f}万",
+                    f"{scenario_params_obj.official_retirement_age}岁存款": f"¥{pension_data.savings/10000:.2f}万" if pension_data else "-",
+                    f"{scenario_params_obj.official_retirement_age}岁总资产": f"¥{pension_data.total_assets/10000:.2f}万" if pension_data else "-",
+                    f"{scenario_params_obj.official_retirement_age}岁养老金": f"¥{pension_data.annual_pension_received/10000:.2f}万" if pension_data and pension_data.annual_pension_received > 0 else "-",
+                    "100岁时总资产": f"¥{final_data.total_assets/10000:.2f}万" if final_data else "-"
                 })
 
         st.dataframe(comparison_data, use_container_width=True)
