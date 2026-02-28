@@ -259,6 +259,102 @@ with st.sidebar:
         default=[]
     )
 
+    # 参数导入导出（折叠）
+    st.divider()
+    with st.expander("📁 参数管理"):
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**导出**")
+            if st.button("📤 导出参数", key="export_params_sidebar"):
+                try:
+                    from src.utils.file_handler import export_user_params_and_presets
+                    import tempfile
+
+                    # 获取当前参数
+                    current_params = FinanceParams(
+                        start_year=int(start_year),
+                        start_work_year=int(start_work_year),
+                        current_age=int(current_age),
+                        retirement_age=int(retirement_age),
+                        official_retirement_age=int(official_retirement_age),
+                        initial_monthly_salary=float(initial_monthly_salary),
+                        local_average_salary=float(local_average_salary),
+                        salary_growth_rate=float(salary_growth_rate),
+                        pension_replacement_ratio=float(pension_replacement_ratio),
+                        contribution_ratio=float(contribution_ratio),
+                        living_expense_ratio=float(living_expense_ratio),
+                        deposit_rate=float(deposit_rate),
+                        inflation_rate=float(inflation_rate),
+                        initial_savings=float(initial_savings),
+                        initial_housing_fund=float(initial_housing_fund),
+                        housing_fund_rate=float(housing_fund_rate),
+                        initial_personal_pension=0.0
+                    )
+
+                    # 创建临时文件
+                    with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
+                        export_user_params_and_presets(current_params, tmp_file.name)
+
+                        # 提供下载
+                        with open(tmp_file.name, 'rb') as f:
+                            st.download_button(
+                                label="⬇️ 下载",
+                                data=f,
+                                file_name="家庭收支预测-参数配置.xlsx",
+                                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                key="download_params"
+                            )
+                    st.success("✓ 导出成功!")
+                except Exception as e:
+                    st.error(f"导出失败: {str(e)}")
+
+        with col2:
+            st.markdown("**导入**")
+            uploaded_file = st.file_uploader("选择文件", type=['xlsx', 'xls'], key="file_uploader_sidebar")
+            if uploaded_file is not None:
+                try:
+                    from src.utils.file_handler import import_params_from_excel
+                    imported_data = import_params_from_excel(uploaded_file)
+                    st.success("✓ 读取成功!")
+
+                    if st.button("✅ 应用并刷新", key="apply_imported_sidebar"):
+                        # 应用用户参数
+                        if 'user_params' in imported_data:
+                            param_mapping = {
+                                '起始年份': 'start_year',
+                                '开始工作年份': 'start_work_year',
+                                '当前年龄': 'current_age',
+                                '提前退休年龄': 'retirement_age',
+                                '正式退休年龄': 'official_retirement_age',
+                                '当前月薪(元)': 'initial_monthly_salary',
+                                '当地月平均工资(元)': 'local_average_salary',
+                                '工资年增长率(%)': 'salary_growth_rate',
+                                '养老金替代率': 'pension_replacement_ratio',
+                                '灵活就业缴纳比例': 'contribution_ratio',
+                                '消费水平比例': 'living_expense_ratio',
+                                '存款年利率(%)': 'deposit_rate',
+                                '物价增长率(%)': 'inflation_rate',
+                                '初始存款(元)': 'initial_savings',
+                                '初始公积金(元)': 'initial_housing_fund',
+                                '公积金年增长率(%)': 'housing_fund_rate'
+                            }
+
+                            for chinese_name, english_key in param_mapping.items():
+                                if chinese_name in imported_data['user_params']:
+                                    value = imported_data['user_params'][chinese_name]
+                                    st.session_state[f'param_{english_key}'] = value
+                                    st.session_state[f'text_{english_key}'] = str(value)
+
+                        # 应用自定义预设
+                        if 'user_presets' in imported_data:
+                            for preset_name, preset_data in imported_data['user_presets'].items():
+                                st.session_state.user_presets[preset_name] = preset_data
+
+                        st.success("✓ 参数已应用! 页面即将刷新...")
+                        st.rerun()
+                except Exception as e:
+                    st.error(f"导入失败: {str(e)}")
+
 # 创建参数对象
 params = FinanceParams(
     start_year=int(start_year),
@@ -353,78 +449,6 @@ with col1:
                 file_name=output_file,
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-
-# 参数导入导出
-st.divider()
-st.subheader("📁 参数管理")
-
-col1, col2 = st.columns(2)
-with col1:
-    st.markdown("**导出当前参数**")
-    st.info("💡 导出您当前填写的所有参数和自定义预设，方便以后导入使用")
-    if st.button("📤 导出当前参数", key="export_params"):
-        try:
-            from src.utils.file_handler import export_user_params_and_presets
-            import tempfile
-
-            # 创建临时文件
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_file:
-                export_user_params_and_presets(params, tmp_file.name)
-
-                # 提供下载
-                with open(tmp_file.name, 'rb') as f:
-                    st.download_button(
-                        label="⬇️ 下载参数文件",
-                        data=f,
-                        file_name="家庭收支预测-参数配置.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    )
-            st.success("✓ 参数导出成功!")
-        except Exception as e:
-            st.error(f"导出失败: {str(e)}")
-            import traceback
-            st.error(traceback.format_exc())
-
-with col2:
-    st.markdown("**导入参数配置**")
-    st.info("💡 从之前导出的 Excel 文件导入参数和预设")
-    uploaded_file = st.file_uploader("选择参数文件", type=['xlsx', 'xls'], key="file_uploader")
-    if uploaded_file is not None:
-        try:
-            from src.utils.file_handler import import_params_from_excel
-            imported_data = import_params_from_excel(uploaded_file)
-            st.success("✓ 文件读取成功!")
-
-            with st.expander("📋 查看导入的内容", expanded=False):
-                if 'user_params' in imported_data:
-                    st.markdown("**用户参数**")
-                    st.json(imported_data['user_params'])
-                if 'user_presets' in imported_data:
-                    st.markdown("**自定义预设**")
-                    for name, data in imported_data['user_presets'].items():
-                        st.markdown(f"- **{name}**: {data.get('description', '')}")
-
-            if st.button("✅ 应用导入的数据并刷新页面", key="apply_imported"):
-                # 应用用户参数
-                if 'user_params' in imported_data:
-                    for key, value in imported_data['user_params'].items():
-                        if key == 'text_':
-                            # 跳过文本输入的内部键
-                            continue
-                        st.session_state[f'param_{key}'] = value
-                        st.session_state[f'text_{key}'] = str(value)
-
-                # 应用自定义预设
-                if 'user_presets' in imported_data:
-                    for preset_name, preset_data in imported_data['user_presets'].items():
-                        st.session_state.user_presets[preset_name] = preset_data
-
-                st.success("✓ 参数已应用! 页面即将刷新...")
-                st.rerun()
-        except Exception as e:
-            st.error(f"导入失败: {str(e)}")
-            import traceback
-            st.error(traceback.format_exc())
 
 # 多场景对比
 if compare_scenarios:
