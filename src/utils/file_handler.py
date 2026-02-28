@@ -13,7 +13,7 @@ def export_to_excel(
     with pd.ExcelWriter(output_path, engine='xlsxwriter') as writer:
         # 参数配置工作表
         params_df = pd.DataFrame([{
-            "参数名称": "起始年份",
+            "参数名称": "起始年份（默认今年）",
             "参数值": params.start_year,
             "说明": "预测开始的年份"
         }, {
@@ -189,7 +189,7 @@ def export_user_params_and_presets(params: FinanceParams, output_path: str):
     with pd.ExcelWriter(output_path, engine='xlsxwriter') as writer:
         # 用户当前参数工作表
         user_params_data = [{
-            "参数名称": "起始年份",
+            "参数名称": "起始年份（默认今年）",
             "参数值": params.start_year,
             "说明": "预测开始的年份"
         }, {

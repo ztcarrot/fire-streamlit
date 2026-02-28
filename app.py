@@ -157,7 +157,7 @@ with st.sidebar:
 
         col1, col2 = st.columns(2)
         with col1:
-            start_year = text_input_number("起始年份", 'start_year', get_param('start_year', CURRENT_YEAR, 'int'), 'int')
+            start_year = text_input_number("起始年份（默认今年）", 'start_year', get_param('start_year', CURRENT_YEAR, 'int'), 'int')
             current_age = text_input_number("当前年龄", 'current_age', get_param('current_age', 34, 'int'), 'int')
         with col2:
             start_work_year = text_input_number("开始工作年份", 'start_work_year', get_param('start_work_year', CURRENT_YEAR-10, 'int'), 'int')
