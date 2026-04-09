@@ -46,9 +46,11 @@ URL_PARAM_MAPPING = {
 }
 
 # 从 URL 查询参数读取并同步到 session_state
+# 只在首次加载时从 URL 读取参数（session_state 中不存在时）
 query_params = st.query_params
 for param_key, config in URL_PARAM_MAPPING.items():
-    if param_key in query_params:
+    # 只有当 session_state 中没有该参数时，才从 URL 读取
+    if param_key in query_params and f'param_{param_key}' not in st.session_state:
         url_value = query_params[param_key]
         try:
             # 先转换为 float，这样可以处理 "2850000.0" 这样的格式
