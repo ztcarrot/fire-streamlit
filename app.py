@@ -23,6 +23,41 @@ if 'show_param_guide' not in st.session_state:
 if 'show_help' not in st.session_state:
     st.session_state.show_help = False
 
+# 从 URL 查询参数同步到 session_state
+# 定义可从 URL 设置的参数及其默认值和类型
+URL_PARAM_MAPPING = {
+    'start_year': {'default': CURRENT_YEAR, 'type': 'int'},
+    'current_age': {'default': 34, 'type': 'int'},
+    'start_work_year': {'default': 2014, 'type': 'int'},
+    'retirement_age': {'default': 45, 'type': 'int'},
+    'official_retirement_age': {'default': 60, 'type': 'int'},
+    'initial_monthly_salary': {'default': 10000, 'type': 'int'},
+    'local_average_salary': {'default': 12434, 'type': 'int'},
+    'initial_savings': {'default': 1000000, 'type': 'int'},
+    'initial_housing_fund': {'default': 150000, 'type': 'int'},
+}
+
+# 从 URL 查询参数读取并同步到 session_state
+query_params = st.query_params
+for param_key, config in URL_PARAM_MAPPING.items():
+    if param_key in query_params:
+        url_value = query_params[param_key]
+        try:
+            if config['type'] == 'int':
+                parsed_value = int(url_value)
+            elif config['type'] == 'float':
+                parsed_value = float(url_value)
+            else:
+                parsed_value = url_value
+
+            # 同步到 session_state
+            st.session_state[f'param_{param_key}'] = parsed_value
+            # 同步到文本输入框的值
+            st.session_state[f'text_{param_key}'] = str(parsed_value)
+        except (ValueError, TypeError):
+            # 如果 URL 参数值无效，忽略并使用默认值
+            pass
+
 # 顶部快捷链接
 col1, col2, col3 = st.columns([3, 1, 1])
 with col1:
