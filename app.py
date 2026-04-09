@@ -146,6 +146,21 @@ with st.sidebar:
                 return float(val)
             return val
 
+        def update_url_params():
+            """将所有参数同步到 URL"""
+            url_params = {}
+            for param_key, config in URL_PARAM_MAPPING.items():
+                value = st.session_state.get(f'param_{param_key}', config['default'])
+                if value is not None:
+                    # 将值转换为字符串格式
+                    if config['type'] == 'int':
+                        url_params[param_key] = str(int(value))
+                    else:  # float
+                        url_params[param_key] = str(float(value))
+
+            # 更新 URL 参数
+            st.query_params.update(url_params)
+
         def text_input_number(label, key, default, param_type='int', help=None):
             """文本输入数字，不捕获滚轮事件"""
             # 获取之前保存的值或使用默认值
@@ -158,8 +173,15 @@ with st.sidebar:
                     num_val = int(input_val) if input_val else default
                 else:
                     num_val = float(input_val) if input_val else default
-                # 保存到 param key 供后续使用
-                st.session_state[f'param_{key}'] = num_val
+
+                # 检查值是否发生变化
+                old_val = st.session_state.get(f'param_{key}', None)
+                if old_val != num_val:
+                    # 保存到 param key 供后续使用
+                    st.session_state[f'param_{key}'] = num_val
+                    # 更新 URL 参数
+                    update_url_params()
+
                 return num_val
             except ValueError:
                 # 如果转换失败，返回默认值
@@ -235,6 +257,8 @@ with st.sidebar:
                                     st.session_state[f'text_{key}'] = str(value)
                             except Exception as e:
                                 st.error(f"加载参数 {key} 失败: {str(e)}")
+                        # 更新 URL 参数
+                        update_url_params()
                         st.success("✓ 预设已加载!")
                         st.rerun()
                 with col2:
