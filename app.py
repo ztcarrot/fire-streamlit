@@ -497,13 +497,24 @@ yearly_data = calculate_yearly_projection(params)
 # 显示关键指标
 # 查找破产年份（总资产第一次小于零）
 bankruptcy_data = next((d for d in yearly_data if d.total_assets < 0), None)
+# 获取正式退休时的数据
+official_retirement_data = next((d for d in yearly_data if d.age == official_retirement_age), None)
+
 st.markdown("---")
 st.subheader("🎯 关键指标预测")
-col1 = st.columns(1)[0]
+col1, col2 = st.columns(2)
+
+# 破产年份
 if bankruptcy_data:
     col1.metric("⚠️ 破产年份", f"{bankruptcy_data.year}年", f"时年{bankruptcy_data.age}岁")
 else:
     col1.metric("✅ 不会破产", "∞", "资金可持续")
+
+# 正式退休时总资产
+if official_retirement_data:
+    col2.metric("💰 正式退休时总资产", f"¥{official_retirement_data.total_assets/10000:.2f}万", f"{official_retirement_data.year}年")
+else:
+    col2.metric("💰 正式退休时总资产", "-", "数据未生成")
 
 # 显示图表
 st.subheader("📈 资产趋势图")
