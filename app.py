@@ -499,6 +499,7 @@ yearly_data = calculate_yearly_projection(params)
 bankruptcy_data = next((d for d in yearly_data if d.total_assets < 0), None)
 st.markdown("---")
 st.subheader("🎯 关键指标预测")
+col1 = st.columns(1)[0]
 if bankruptcy_data:
     col1.metric("⚠️ 破产年份", f"{bankruptcy_data.year}年", f"时年{bankruptcy_data.age}岁")
 else:
