@@ -495,15 +495,14 @@ params = FinanceParams(
 yearly_data = calculate_yearly_projection(params)
 
 # 显示关键指标
-retirement_data = next((d for d in yearly_data if d.age == retirement_age), None)
-if retirement_data:
-    st.markdown("---")
-    st.subheader("🎯 关键指标预测")
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("📅 退休年龄", f"{retirement_age}岁")
-    col2.metric("📆 退休年份", f"{retirement_data.year}年")
-    col3.metric("💵 退休时存款", f"¥{retirement_data.savings/10000:.2f}万")
-    col4.metric("💰 退休时总资产", f"¥{retirement_data.total_assets/10000:.2f}万")
+# 查找破产年份（总资产第一次小于零）
+bankruptcy_data = next((d for d in yearly_data if d.total_assets < 0), None)
+st.markdown("---")
+st.subheader("🎯 关键指标预测")
+if bankruptcy_data:
+    col1.metric("⚠️ 破产年份", f"{bankruptcy_data.year}年", f"时年{bankruptcy_data.age}岁")
+else:
+    col1.metric("✅ 不会破产", "∞", "资金可持续")
 
 # 显示图表
 st.subheader("📈 资产趋势图")
