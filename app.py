@@ -457,7 +457,7 @@ def color_negative_red(val):
     return ''
 
 # 应用样式
-styled_df = df.style.applymap(color_negative_red, subset=['总资产'])
+styled_df = df.style.map(color_negative_red, subset=['总资产'])
 # 格式化总资产列
 styled_df = styled_df.format({'总资产': '¥{:.2f}万'})
 # 固定索引列（年龄）在左侧
