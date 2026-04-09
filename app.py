@@ -296,9 +296,11 @@ with st.sidebar:
         with col2:
             living_expense_ratio = text_input_number("消费系数", 'living_expense_ratio', get_param('living_expense_ratio', 0.5, 'float'), 'float',
                                      help="月生活开销占当地平均工资的比例")
-            # 显示计算后的当前平均年消费金额
+            # 显示计算后的当前平均年消费金额和月消费金额
             annual_expense = living_expense_ratio * local_average_salary * 12
+            monthly_expense = living_expense_ratio * local_average_salary
             st.caption(f"💰 当前平均年消费: ¥{annual_expense:,.0f} 元")
+            st.caption(f"💵 当前平均月消费: ¥{monthly_expense:,.0f} 元")
 
         contribution_ratio = text_input_number("灵活就业缴纳比例", 'contribution_ratio', get_param('contribution_ratio', 0.6, 'float'), 'float',
                                        help="社保缴费基数比例(0.6-3.0)")
