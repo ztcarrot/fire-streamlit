@@ -35,6 +35,14 @@ URL_PARAM_MAPPING = {
     'local_average_salary': {'default': 12434, 'type': 'int'},
     'initial_savings': {'default': 1000000, 'type': 'int'},
     'initial_housing_fund': {'default': 150000, 'type': 'int'},
+    'housing_fund_rate': {'default': 1.5, 'type': 'float'},
+    'salary_growth_rate': {'default': 4.0, 'type': 'float'},
+    'pension_replacement_ratio': {'default': 0.4, 'type': 'float'},
+    'contribution_ratio': {'default': 0.6, 'type': 'float'},
+    'living_expense_ratio': {'default': 0.5, 'type': 'float'},
+    'deposit_rate': {'default': 2.0, 'type': 'float'},
+    'inflation_rate': {'default': 2.0, 'type': 'float'},
+    'initial_personal_pension': {'default': 0.0, 'type': 'float'},
 }
 
 # 从 URL 查询参数读取并同步到 session_state
@@ -43,10 +51,14 @@ for param_key, config in URL_PARAM_MAPPING.items():
     if param_key in query_params:
         url_value = query_params[param_key]
         try:
+            # 先转换为 float，这样可以处理 "2850000.0" 这样的格式
+            float_value = float(url_value)
+
+            # 如果目标类型是 int，将 float 转换为 int
             if config['type'] == 'int':
-                parsed_value = int(url_value)
+                parsed_value = int(float_value)
             elif config['type'] == 'float':
-                parsed_value = float(url_value)
+                parsed_value = float_value
             else:
                 parsed_value = url_value
 
