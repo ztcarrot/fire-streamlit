@@ -307,6 +307,13 @@ with st.sidebar:
 
         contribution_ratio = text_input_number("灵活就业缴纳比例", 'contribution_ratio', get_param('contribution_ratio', 0.6, 'float'), 'float',
                                        help="社保缴费基数比例(0.6-3.0)")
+        # 显示计算后的社保年支出
+        # 灵活就业：按缴费基数的30%缴纳（20%养老保险 + 10%医疗保险）
+        contribution_base = local_average_salary * contribution_ratio
+        annual_pension_contribution = contribution_base * 0.2 * 12  # 养老保险20%
+        annual_medical_contribution = contribution_base * 0.1 * 12  # 医疗保险10%
+        st.caption(f"🏦 养老金缴费年支出: ¥{annual_pension_contribution:,.0f} 元")
+        st.caption(f"🏥 职工医保年支出: ¥{annual_medical_contribution:,.0f} 元")
 
         inflation_rate = 0.0  # 固定为0
 
