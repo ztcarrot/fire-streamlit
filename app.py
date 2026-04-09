@@ -278,6 +278,9 @@ with st.sidebar:
         with col2:
             deposit_rate = text_input_number("预计存款年利率(%)", 'deposit_rate', get_param('deposit_rate', 2.0, 'float'), 'float',
                                 help="银行存款/理财年化收益率")
+            # 显示计算后的当前年利息
+            annual_interest = initial_savings * deposit_rate / 100
+            st.caption(f"💰 当前年利息: ¥{annual_interest:,.0f} 元")
 
         col1, col2 = st.columns(2)
         with col1:
